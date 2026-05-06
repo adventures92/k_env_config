@@ -1,79 +1,228 @@
 # KEnv Config
 
-Schema-based, type-safe environment variable management for Kotlin Multiplatform projects.
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.adventures92/kenv-config)](https://central.sonatype.com/artifact/io.github.adventures92/kenv-config)
 
-KEnv Config generates Kotlin object classes from a YAML schema and environment files at compile time, giving you type-safe access to configuration values across Android, iOS, JVM, and native targets — with zero runtime dependencies.
+Type-safe, schema-driven environment configuration for Kotlin Multiplatform and Android.
 
-## Features
+KEnv Config is a Gradle plugin that generates Kotlin objects from a YAML schema and environment files at compile time. Missing or mistyped values fail the build — not your users at runtime.
 
-- **Type-safe** — Variables are validated against declared types at compile time
-- **Multiplatform** — Generated code lives in `commonMain`, accessible from all targets
-- **Multi-environment** — Define separate configs for dev, staging, production, etc.
-- **Multi-format** — Environment files in `.env`, `.yaml`, or `.toml`
-- **Global variables** — Shared values across all environments with a single source of truth
-- **Grouped variables** — Organize related variables into nested objects
-- **Incremental builds** — Gradle caching means generation only runs when inputs change
-- **CI-friendly** — Switch active environment via `-PactiveEnvironment=production`
-
-## Project Structure
-
+```kotlin
+// Generated — fully type-safe, with IDE documentation
+EnvConfig.setActiveEnvironment("production")
+val url = EnvConfig.Server.API_BASE_URL  // "https://api.example.com"
+val port = EnvConfig.Server.API_PORT     // 443
+val debug = EnvConfig.DEBUG_MODE         // false
 ```
-K_env_config/
-├── kenv-plugin/       # The Gradle plugin (adven.kenv.config)
-├── composeApp/        # Example KMP Compose app demonstrating the plugin
-├── build.gradle.kts   # Root build file
-└── settings.gradle.kts
+
+---
+
+## Installation
+
+### Option 1: Version Catalog (TOML) — Recommended
+
+Add to your `gradle/libs.versions.toml`:
+
+```toml
+[versions]
+kenvConfig = "<latest>"
+
+[plugins]
+kenvConfig = { id = "io.github.adventures92.kenv-config", version.ref = "kenvConfig" }
 ```
+
+Then in your module's `build.gradle.kts`:
+
+```kotlin
+plugins {
+    alias(libs.plugins.kenvConfig)
+}
+```
+
+### Option 2: Direct Plugin Application
+
+In your module's `build.gradle.kts`:
+
+```kotlin
+plugins {
+    id("io.github.adventures92.kenv-config") version "<latest>"
+}
+```
+
+### Repository Setup
+
+Make sure `mavenCentral()` and `gradlePluginPortal()` are in your `settings.gradle.kts`:
+
+```kotlin
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+```
+
+---
 
 ## Quick Start
 
-See the [KEnv Plugin documentation](./kenv-plugin/README.md) for full installation and usage instructions.
+### 1. Create the kenv directory
 
-### TL;DR
+```
+my-app/
+├── kenv/
+│   ├── schema.kenv.yaml
+│   ├── env.dev.env
+│   ├── env.production.env
+│   └── env.global.env
+├── src/
+└── build.gradle.kts
+```
 
-1. Include the plugin in your build
-2. Define a YAML schema with your variables and their types
-3. Create environment files with values for each environment
-4. Access generated type-safe config objects in your Kotlin code
+### 2. Define your schema
+
+`kenv/schema.kenv.yaml`:
+
+```yaml
+environments:
+  - dev
+  - production
+
+variables:
+  DEBUG_MODE:
+    type: Boolean
+    scope: environment
+    description: "Enable debug logging"
+
+groups:
+  server:
+    API_URL:
+      type: Url
+      scope: environment
+      description: "Backend API base URL"
+    API_PORT:
+      type: Int
+      scope: environment
+      description: "Backend API port"
+  app:
+    APP_NAME:
+      type: String
+      scope: global
+      description: "Application display name"
+```
+
+### 3. Create environment files
+
+`kenv/env.dev.env`:
+```dotenv
+DEBUG_MODE=true
+API_URL=http://localhost:8080
+API_PORT=8080
+```
+
+`kenv/env.production.env`:
+```dotenv
+DEBUG_MODE=false
+API_URL=https://api.myapp.com
+API_PORT=443
+```
+
+`kenv/env.global.env`:
+```dotenv
+APP_NAME=My App
+```
+
+### 4. Configure the plugin
 
 ```kotlin
-// Generated at compile time — fully type-safe
-val apiUrl: String = EnvConfig.Dev.Server.API_URL
-val port: Int = EnvConfig.Dev.Server.API_PORT
-val analytics: Boolean = EnvConfig.Production.Feature.ENABLE_ANALYTICS
+kenvConfig {
+    directory.set(file("kenv"))
+    environments.set(listOf("dev", "production"))
+    generatedPackageName.set("com.example.config")
+}
 ```
+
+### 5. Use in your code
+
+```kotlin
+import com.example.config.EnvConfig
+
+// Option A: Set active environment, then use flat access (KMP)
+EnvConfig.setActiveEnvironment("dev")
+println(EnvConfig.Server.API_URL)   // "http://localhost:8080"
+println(EnvConfig.App.APP_NAME)     // "My App"
+
+// Option B: Access per-environment objects directly
+println(EnvConfig.Dev.Server.API_URL)         // "http://localhost:8080"
+println(EnvConfig.Production.Server.API_URL)  // "https://api.myapp.com"
+```
+
+---
+
+## Features
+
+| Feature | Description |
+|---------|-------------|
+| **Compile-time validation** | Missing or mistyped values fail the build with clear error messages |
+| **7 types** | String, Int, Long, Double, Float, Boolean, Url |
+| **Global + environment scopes** | Shared values vs per-environment values |
+| **Groups** | Organize variables into nested Kotlin objects |
+| **KDoc generation** | Schema `description` fields become IDE documentation |
+| **Runtime environment selection** | `setActiveEnvironment()` for KMP projects |
+| **Android variant mapping** | `buildType("debug") uses "dev"` for automatic per-variant codegen |
+| **Unified directory** | Single `kenv/` directory for schema and all env files |
+| **Multi-format** | Environment files in `.env`, `.yaml`, `.yml`, or `.toml` |
+| **Incremental builds** | Cacheable Gradle task, skipped when inputs unchanged |
+| **CI-friendly** | Switch environment via `-PactiveEnvironment=production` |
+
+---
+
+## Android Variant Mapping
+
+For Android projects, map build types directly to environments — no runtime selection needed:
+
+```kotlin
+kenvConfig {
+    directory.set(file("kenv"))
+    environments.set(listOf("dev", "production"))
+    generatedPackageName.set("com.example.config")
+
+    variantMapping {
+        buildType("debug") uses "dev"
+        buildType("release") uses "production"
+    }
+}
+```
+
+The generated code is flat — just `EnvConfig.Server.API_URL` with the correct value baked in per build type.
+
+---
+
+## Documentation
+
+Full documentation: [adventures92.github.io/kenv-config](https://adventures92.github.io/kenv-config/)
+
+- [Getting Started](https://adventures92.github.io/kenv-config/getting-started.html)
+- [Schema Reference](https://adventures92.github.io/kenv-config/schema-reference.html)
+- [Plugin Configuration](https://adventures92.github.io/kenv-config/plugin-configuration.html)
+- [Android Variant Mapping](https://adventures92.github.io/kenv-config/variant-mapping.html)
+- [Runtime Environment Selection](https://adventures92.github.io/kenv-config/runtime-selection.html)
+- [Code Generation](https://adventures92.github.io/kenv-config/code-generation.html)
+
+---
 
 ## Example App
 
-The `composeApp` module is a working Kotlin Multiplatform Compose application that demonstrates the plugin. It:
+The `composeApp` module is a working Kotlin Multiplatform Compose app (Android + iOS) that demonstrates all plugin features including runtime environment switching via a dropdown.
 
-- Applies the `io.github.adventures92.kenv-config` plugin
-- Defines a schema with `server` and `feature` variable groups
-- Provides `dev` and `production` environment files
-- Displays generated config values in the Compose UI
+```bash
+# Run generation
+./gradlew :composeApp:kenvGenerate
 
-### Running the Example
-
-**Android:**
-```shell
+# Build Android
 ./gradlew :composeApp:assembleDebug
 ```
 
-**iOS:**
-Open the `iosApp` directory in Xcode and run from there, or use the run configuration in your IDE.
-
-## Building from Source
-
-```shell
-# Build everything (plugin + example app)
-./gradlew build
-
-# Run plugin tests only
-./gradlew kenv-plugin:test
-
-# Generate config for the example app
-./gradlew :composeApp:kenvGenerate
-```
+---
 
 ## Requirements
 
@@ -83,4 +232,4 @@ Open the `iosApp` directory in Xcode and run from there, or use the run configur
 
 ## License
 
-See [LICENSE](./LICENSE) for details.
+[Apache License 2.0](./LICENSE)

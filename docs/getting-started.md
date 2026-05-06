@@ -2,11 +2,46 @@
 
 ## Installation
 
-Add the KEnv Config plugin to your project's `build.gradle.kts`:
+### Option 1: Version Catalog (TOML) — Recommended
+
+Add to your `gradle/libs.versions.toml`:
+
+```toml
+[versions]
+kenvConfig = "<latest>"
+
+[plugins]
+kenvConfig = { id = "io.github.adventures92.kenv-config", version.ref = "kenvConfig" }
+```
+
+Then in your module's `build.gradle.kts`:
+
+```kotlin
+plugins {
+    alias(libs.plugins.kenvConfig)
+}
+```
+
+### Option 2: Direct Plugin Application
+
+In your module's `build.gradle.kts`:
 
 ```kotlin
 plugins {
     id("io.github.adventures92.kenv-config") version "<latest>"
+}
+```
+
+### Repository Setup
+
+Ensure `mavenCentral()` and `gradlePluginPortal()` are in your `settings.gradle.kts`:
+
+```kotlin
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
 }
 ```
 
