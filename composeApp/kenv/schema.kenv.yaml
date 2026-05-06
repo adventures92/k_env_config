@@ -1,0 +1,50 @@
+environments:
+  - dev
+  - production
+
+variables:
+  APP_VERSION:
+    type: String
+    scope: global
+    description: "Current application version string"
+  DEBUG_MODE:
+    type: Boolean
+    scope: environment
+    description: "Enables verbose logging and debug overlays"
+
+groups:
+  server:
+    API_BASE_URL:
+      type: Url
+      scope: environment
+      description: "Backend API base URL including protocol"
+    API_PORT:
+      type: Int
+      scope: environment
+      description: "Backend API port number"
+    API_TIMEOUT_MS:
+      type: Long
+      scope: environment
+      description: "HTTP request timeout in milliseconds"
+  identity:
+    APP_NAME:
+      type: String
+      scope: global
+      description: "Display name shown in the app header"
+    SUPPORT_EMAIL:
+      type: String
+      scope: global
+      description: "Contact email for user support"
+  feature:
+    ENABLE_ANALYTICS:
+      type: Boolean
+      scope: environment
+      description: "Whether analytics event tracking is enabled"
+    MAX_RETRIES:
+      type: Int
+      scope: environment
+      description: "Maximum number of retry attempts for failed requests"
+    CACHE_TTL_SECONDS:
+      type: Double
+      scope: environment
+      description: "Cache time-to-live in seconds (supports fractional)"

@@ -1,0 +1,15 @@
+[book]
+title = "KEnv Config"
+authors = ["adventures92"]
+description = "Type-safe, schema-driven environment configuration for Kotlin Multiplatform and Android"
+src = "docs"
+language = "en"
+
+[build]
+build-dir = "book"
+
+[output.html]
+default-theme = "light"
+preferred-dark-theme = "ayu"
+git-repository-url = "https://github.com/adventures92/k_env_config"
+edit-url-template = "https://github.com/adventures92/k_env_config/edit/main/{path}"
