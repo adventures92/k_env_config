@@ -7,4 +7,3 @@
 - [Android Variant Mapping](variant-mapping.md)
 - [Runtime Environment Selection](runtime-selection.md)
 - [Code Generation](code-generation.md)
-- [Migration Guide (v1 → v2)](migration-guide.md)

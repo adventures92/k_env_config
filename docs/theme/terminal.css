@@ -1,0 +1,322 @@
+/* ============================================
+   KEnv Config — Futuristic Terminal Theme
+   Clean, readable, developer-friendly
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* --- Ayu theme overrides --- */
+.ayu {
+    --bg: #0f1419;
+    --fg: #e6e1cf;
+    --sidebar-bg: #0b0f13;
+    --sidebar-fg: #9da5b4;
+    --sidebar-active: #73d0ff;
+    --sidebar-spacer: #1c2433;
+    --scrollbar: #1c2433;
+    --icons: #6b7d8f;
+    --icons-hover: #73d0ff;
+    --links: #73d0ff;
+    --inline-code-color: #ffb454;
+    --theme-popup-bg: #131920;
+    --theme-popup-border: #1c2433;
+    --theme-hover: #1a2130;
+    --quote-bg: #131920;
+    --quote-border: #73d0ff;
+    --table-border-color: #1c2433;
+    --table-header-bg: #131920;
+    --table-alternate-bg: #0f1419;
+    --searchbar-border-color: #1c2433;
+    --searchbar-bg: #131920;
+    --searchbar-fg: #e6e1cf;
+    --search-mark-bg: #73d0ff30;
+}
+
+/* --- Base typography --- */
+.ayu .content {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15.5px;
+    line-height: 1.8;
+    color: #d4cfc4;
+    max-width: 820px;
+}
+
+.ayu .content p {
+    margin-bottom: 1.2em;
+}
+
+/* --- Headings --- */
+.ayu h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 2em;
+    color: #73d0ff;
+    margin-top: 0;
+    margin-bottom: 0.6em;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #1c2433;
+    letter-spacing: -0.5px;
+}
+
+.ayu h2 {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 1.4em;
+    color: #95e6cb;
+    margin-top: 2em;
+    margin-bottom: 0.5em;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #1c243380;
+}
+
+.ayu h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    font-size: 1.15em;
+    color: #d4bfff;
+    margin-top: 1.6em;
+    margin-bottom: 0.4em;
+}
+
+.ayu h4 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    color: #e6e1cf;
+    margin-top: 1.4em;
+}
+
+/* --- Code blocks --- */
+.ayu pre {
+    background-color: #0b0f13 !important;
+    border: 1px solid #1c2433;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 1.4em 0;
+    overflow-x: auto;
+    position: relative;
+}
+
+.ayu pre::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ff5f56;
+    box-shadow: 16px 0 0 #ffbd2e, 32px 0 0 #27c93f;
+}
+
+.ayu pre code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.6;
+    display: block;
+    padding-top: 16px;
+}
+
+/* --- Inline code --- */
+.ayu :not(pre) > code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    background-color: #1a2130;
+    border: 1px solid #1c2433;
+    border-radius: 5px;
+    padding: 2px 7px;
+    color: #ffb454;
+}
+
+/* --- Sidebar --- */
+.ayu .sidebar {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    border-right: 1px solid #1c2433;
+}
+
+.ayu .sidebar .sidebar-scrollbox {
+    background-color: #0b0f13;
+    padding: 10px 0;
+}
+
+.ayu .sidebar a {
+    color: #9da5b4;
+    padding: 6px 20px;
+    display: block;
+    border-left: 3px solid transparent;
+    transition: all 0.15s ease;
+}
+
+.ayu .sidebar a:hover {
+    color: #e6e1cf;
+    background-color: #1a213020;
+    border-left-color: #73d0ff40;
+}
+
+.ayu .sidebar a.active {
+    color: #73d0ff;
+    font-weight: 600;
+    background-color: #73d0ff10;
+    border-left-color: #73d0ff;
+}
+
+/* --- Links --- */
+.ayu a {
+    color: #73d0ff;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.ayu a:hover {
+    color: #95e6cb;
+}
+
+.ayu .content a {
+    border-bottom: 1px solid #73d0ff30;
+}
+
+.ayu .content a:hover {
+    border-bottom-color: #95e6cb;
+}
+
+/* --- Tables --- */
+.ayu table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1.2em 0;
+    font-size: 14px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #1c2433;
+}
+
+.ayu table th {
+    background-color: #131920;
+    color: #73d0ff;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    font-size: 13px;
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 2px solid #1c2433;
+}
+
+.ayu table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid #1c243360;
+    color: #d4cfc4;
+}
+
+.ayu table tr:last-child td {
+    border-bottom: none;
+}
+
+.ayu table tr:hover td {
+    background-color: #1a213030;
+}
+
+/* --- Blockquotes --- */
+.ayu blockquote {
+    border-left: 3px solid #73d0ff;
+    background-color: #131920;
+    padding: 14px 20px;
+    margin: 1.2em 0;
+    border-radius: 0 8px 8px 0;
+    color: #9da5b4;
+    font-size: 14.5px;
+}
+
+.ayu blockquote p:last-child {
+    margin-bottom: 0;
+}
+
+/* --- Lists --- */
+.ayu ul, .ayu ol {
+    padding-left: 1.6em;
+    margin: 0.8em 0;
+}
+
+.ayu li {
+    margin-bottom: 0.4em;
+    line-height: 1.7;
+}
+
+.ayu li::marker {
+    color: #73d0ff;
+}
+
+/* --- Strong/bold --- */
+.ayu strong {
+    color: #e6e1cf;
+    font-weight: 600;
+}
+
+/* --- Horizontal rule --- */
+.ayu hr {
+    border: none;
+    border-top: 1px solid #1c2433;
+    margin: 2em 0;
+}
+
+/* --- Menu title --- */
+.ayu .menu-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 15px;
+    color: #73d0ff !important;
+    padding: 16px 20px;
+    border-bottom: 1px solid #1c2433;
+}
+
+/* --- Nav buttons --- */
+.ayu .nav-chapters {
+    color: #6b7d8f;
+    font-size: 14px;
+    transition: color 0.15s ease;
+}
+
+.ayu .nav-chapters:hover {
+    color: #73d0ff;
+}
+
+/* --- Search --- */
+.ayu .searchresults-outer {
+    background-color: #131920;
+    border: 1px solid #1c2433;
+    border-radius: 8px;
+}
+
+.ayu .search-results a {
+    border-bottom: none;
+}
+
+.ayu #searchbar {
+    font-family: 'Inter', sans-serif;
+    border-radius: 6px;
+}
+
+/* --- Scrollbar --- */
+.ayu ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.ayu ::-webkit-scrollbar-track {
+    background: #0f1419;
+}
+
+.ayu ::-webkit-scrollbar-thumb {
+    background: #1c2433;
+    border-radius: 4px;
+}
+
+.ayu ::-webkit-scrollbar-thumb:hover {
+    background: #2d3a4a;
+}
+
+/* --- Selection --- */
+.ayu ::selection {
+    background: #73d0ff30;
+    color: #e6e1cf;
+}
