@@ -1,0 +1,33 @@
+version: 2
+updates:
+  # The published plugin. kenv-plugin is a separate build, so it needs its own entry —
+  # a "/" gradle entry does not traverse into an included build.
+  - package-ecosystem: gradle
+    directory: "/kenv-plugin"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      kotlin:
+        patterns: ["org.jetbrains.kotlin*", "org.jetbrains.kotlinx*"]
+      kotest:
+        patterns: ["io.kotest*"]
+
+  # The demo app and the shared version catalog.
+  - package-ecosystem: gradle
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      kotlin:
+        patterns: ["org.jetbrains.kotlin*", "org.jetbrains.kotlinx*"]
+      androidx:
+        patterns: ["androidx.*"]
+      compose:
+        patterns: ["org.jetbrains.compose*"]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly

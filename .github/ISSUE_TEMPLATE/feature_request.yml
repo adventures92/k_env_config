@@ -1,0 +1,37 @@
+name: Feature request
+description: Suggest a capability this plugin does not have.
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do that the plugin makes hard or impossible today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like instead
+      description: If it affects the schema or the `kenvConfig` DSL, sketch how it would look.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you tried instead
+      description: >
+        Existing features that nearly work, and where they fall short. A request that can already
+        be met is usually a documentation gap, which is useful to know.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: >
+            This does not require reading secrets at runtime. Generated config is baked in at build
+            time by design — runtime secret fetching is out of scope.
+          required: true

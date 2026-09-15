@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or usage help
+    url: https://github.com/adventures92/k_env_config/discussions
+    about: Ask how to use the plugin, or discuss an idea before opening an issue.
+  - name: Security vulnerability
+    url: https://github.com/adventures92/k_env_config/security/advisories/new
+    about: Report privately. Please do not open a public issue for security problems.
