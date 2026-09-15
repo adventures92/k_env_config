@@ -60,7 +60,7 @@ mavenPublishing {
         name.set("KEnv Config")
         description.set("Schema-based, type-safe environment variable management for Kotlin Multiplatform projects")
         inceptionYear.set("2025")
-        url.set("https://github.com/adventures92/kenv-config")
+        url.set("https://github.com/adventures92/k_env_config")
 
         licenses {
             license {
@@ -79,9 +79,9 @@ mavenPublishing {
         }
 
         scm {
-            url.set("https://github.com/adventures92/kenv-config")
-            connection.set("scm:git:git://github.com/adventures92/kenv-config.git")
-            developerConnection.set("scm:git:ssh://git@github.com/adventures92/kenv-config.git")
+            url.set("https://github.com/adventures92/k_env_config")
+            connection.set("scm:git:git://github.com/adventures92/k_env_config.git")
+            developerConnection.set("scm:git:ssh://git@github.com/adventures92/k_env_config.git")
         }
     }
 }
