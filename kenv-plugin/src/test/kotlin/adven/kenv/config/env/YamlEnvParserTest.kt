@@ -146,4 +146,70 @@ class YamlEnvParserTest : FunSpec({
         result.value.values["FLAG"] shouldBe "true"
         result.value.values["EMPTY"] shouldBe ""
     }
+
+    // Regression: YAML 1.1 implicit typing used to rewrite unquoted scalars, so a
+    // hand-written env file silently produced a different value than it showed.
+
+    test("does not coerce YAML 1.1 boolean literals") {
+        val content = """
+            FEATURE_A: on
+            FEATURE_B: off
+            FEATURE_C: yes
+            FEATURE_D: no
+            FEATURE_E: y
+            FEATURE_F: n
+            FEATURE_G: true
+            FEATURE_H: false
+        """.trimIndent()
+        val result = parser.parse(content, "env.dev.yaml", "dev")
+
+        result.shouldBeInstanceOf<ParseResult.Success<EnvironmentConfig>>()
+        result.value.values shouldBe mapOf(
+            "FEATURE_A" to "on",
+            "FEATURE_B" to "off",
+            "FEATURE_C" to "yes",
+            "FEATURE_D" to "no",
+            "FEATURE_E" to "y",
+            "FEATURE_F" to "n",
+            "FEATURE_G" to "true",
+            "FEATURE_H" to "false"
+        )
+    }
+
+    test("preserves numeric values verbatim") {
+        val content = """
+            API_VERSION: 1.10
+            API_PORT: 0755
+            HEX_ID: 0x1F
+            TIMEOUT_MS: 30000
+            RATIO: 1e5
+        """.trimIndent()
+        val result = parser.parse(content, "env.dev.yaml", "dev")
+
+        result.shouldBeInstanceOf<ParseResult.Success<EnvironmentConfig>>()
+        result.value.values shouldBe mapOf(
+            "API_VERSION" to "1.10",
+            "API_PORT" to "0755",
+            "HEX_ID" to "0x1F",
+            "TIMEOUT_MS" to "30000",
+            "RATIO" to "1e5"
+        )
+    }
+
+    test("round-trips YAML 1.1 boolean literals through print") {
+        val values = listOf("on", "off", "yes", "no", "y", "n", "On", "OFF", "No")
+            .withIndex()
+            .associate { (index, value) -> "FLAG_$index" to value }
+        val config = EnvironmentConfig(
+            name = "dev",
+            values = values,
+            format = EnvFileFormat.YAML,
+            sourceFile = "env.dev.yaml"
+        )
+
+        val result = parser.parse(parser.print(config), "env.dev.yaml", "dev")
+
+        result.shouldBeInstanceOf<ParseResult.Success<EnvironmentConfig>>()
+        result.value.values shouldBe values
+    }
 })
