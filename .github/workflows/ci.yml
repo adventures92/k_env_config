@@ -1,33 +1,88 @@
-name: CI
+name: ci
+
+# The correctness gate. Every pull request and every push to main.
+#
+# Runs on GitHub-hosted runners. This used to require a self-hosted ["self-hosted",
+# "android-runner"] machine with a hardcoded GRADLE_USER_HOME of /Users/macmini/.gradle, which
+# meant nobody could fork this repository and get CI, a green tick proved only "works on that one
+# Mac mini", and the build could pass because of state left in a shared Gradle home rather than
+# because it is reproducible.
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
-  test:
-    name: Build and test
-    runs-on: ["self-hosted", "android-runner"]
-    env:
-      GRADLE_USER_HOME: /Users/macmini/.gradle
-
+  # The published plugin. This is the job that gates a release.
+  plugin:
+    name: plugin
+    runs-on: ubuntu-latest
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
-          distribution: 'zulu'
+          distribution: temurin
           java-version: 21
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
+      # Dependency caching and Gradle wrapper checksum validation.
+      #
+      # Held at v5 deliberately. v6 moves caching into `gradle-actions-caching`, a proprietary
+      # component whose use requires accepting https://gradle.com/legal/terms-of-use/ — a licensing
+      # decision, not a version bump. v5 already runs on Node 24, so it carries no deprecation debt.
+      - uses: gradle/actions/setup-gradle@v5
 
-      - name: Build project
-        run: ./gradlew build
-
-      - name: Run plugin tests
+      - name: Test the plugin
         run: ./gradlew kenv-plugin:test
+
+      # A test framework that discovers nothing still exits 0. Kotest 6 changed discovery, so
+      # assert the suite actually ran rather than trusting the exit code.
+      - name: Assert tests actually ran
+        run: |
+          results=kenv-plugin/build/test-results/test
+          test -d "$results" || { echo "::error::no test results directory"; exit 1; }
+          count=$(grep -ho 'tests="[0-9]*"' "$results"/*.xml | grep -o '[0-9]*' | awk '{s+=$1} END{print s+0}')
+          echo "tests executed: ${count:-0}"
+          [ "${count:-0}" -gt 0 ] || { echo "::error::test task ran but discovered no tests"; exit 1; }
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: plugin-test-results
+          path: kenv-plugin/build/test-results/test/
+          retention-days: 7
+
+  # The demo app is the only end-to-end proof that generation works against a real consumer.
+  demo:
+    name: demo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v5
+
+      # Runs the plugin against the demo's real schema and env files, then asserts it emitted
+      # something. `assembleDebug` alone would not catch generation producing an empty file.
+      - name: Generate config and build the demo
+        run: |
+          ./gradlew :composeApp:kenvGenerate
+          find composeApp/build/generated/kenv -name '*.kt' -print | head -20
+          test -n "$(find composeApp/build/generated/kenv -name '*.kt' -print -quit)" \
+            || { echo "::error::kenvGenerate produced no Kotlin"; exit 1; }
+          ./gradlew :composeApp:assembleDebug
