@@ -1,7 +1,7 @@
 plugins {
-    kotlin("jvm") version "2.4.20"
+    alias(libs.plugins.kotlinJvm)
     `java-gradle-plugin`
-    id("com.vanniktech.maven.publish") version "0.37.0"
+    alias(libs.plugins.mavenPublish)
 }
 
 group = "io.github.adventures92"
@@ -19,15 +19,15 @@ dependencies {
     implementation(kotlin("stdlib"))
 
     // YAML parsing
-    implementation("org.yaml:snakeyaml:2.4")
+    implementation(libs.snakeyaml)
 
     // TOML parsing
-    implementation("com.moandjiezana.toml:toml4j:0.7.2")
+    implementation(libs.toml4j)
 
     // Test dependencies
-    testImplementation("io.kotest:kotest-runner-junit5:6.2.5")
-    testImplementation("io.kotest:kotest-property:6.2.5")
-    testImplementation("io.kotest:kotest-assertions-core:6.2.5")
+    testImplementation(libs.kotest.runner.junit5)
+    testImplementation(libs.kotest.property)
+    testImplementation(libs.kotest.assertionsCore)
     testImplementation(gradleTestKit())
 }
 
