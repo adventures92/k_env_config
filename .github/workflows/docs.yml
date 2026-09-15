@@ -1,12 +1,22 @@
-name: Deploy Documentation
+name: docs
+
+# Publishes the mdBook guide to GitHub Pages.
+# Requires Settings → Pages → Source: GitHub Actions.
+#
+# This used to be two workflows. `mdbook.yml` (the unmodified GitHub starter) also fired on every
+# push to main and shared this same `concurrency: pages` group with `cancel-in-progress: false`,
+# so both ran and whichever finished last won. Which workflow published the site was a race, and
+# they did not even build it the same way — the starter pinned mdBook 0.4.36 and compiled it from
+# source with cargo, taking minutes per run.
 
 on:
   push:
     branches: [main]
     paths:
-      - 'docs/**'
-      - '.github/workflows/docs.yml'
-      - 'book.toml'
+      - "docs/**"
+      - "book.toml"
+      - ".github/workflows/docs.yml"
+  workflow_call:
   workflow_dispatch:
 
 permissions:
@@ -15,38 +25,50 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: false
 
 jobs:
   build:
-    name: Build documentation
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - name: Setup mdBook
-        uses: peaceiris/actions-mdbook@v2
-        with:
-          mdbook-version: 'latest'
+      # Installed directly rather than via peaceiris/actions-mdbook. That action's released @v2 tag
+      # still declares `using: node20`; the fix exists on its main branch but it has cut no release
+      # since April 2024, so there is no tag to move to. mdBook is a single static binary, so the
+      # action was only ever saving a curl.
+      #
+      # This also keeps third-party JavaScript out of a job holding `pages: write` and
+      # `id-token: write`, and pins an exact version — the previous `mdbook-version: latest` let an
+      # upstream release change the published docs with no change here.
+      - name: Install mdBook
+        env:
+          MDBOOK_VERSION: "0.5.4"
+        run: |
+          curl -fsSL --retry 3 \
+            "https://github.com/rust-lang/mdBook/releases/download/v${MDBOOK_VERSION}/mdbook-v${MDBOOK_VERSION}-x86_64-unknown-linux-gnu.tar.gz" \
+            | tar -xz -C /usr/local/bin mdbook
+          mdbook --version
 
-      - name: Build documentation
+      - name: Build the guide
         run: mdbook build
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Check the build produced something
+        run: |
+          test -f book/index.html || { echo "::error::mdBook produced no index.html"; exit 1; }
+          echo "pages: $(find book -name '*.html' | wc -l)"
+
+      - uses: actions/upload-pages-artifact@v5
         with:
-          path: ./book
+          path: book
 
   deploy:
-    name: Deploy to GitHub Pages
-    needs: build
     runs-on: ubuntu-latest
+    needs: build
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - id: deploy
+        uses: actions/deploy-pages@v5
