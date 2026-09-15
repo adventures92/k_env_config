@@ -1,7 +1,7 @@
 plugins {
-    kotlin("jvm") version "2.3.20"
+    kotlin("jvm") version "2.4.20"
     `java-gradle-plugin`
-    id("com.vanniktech.maven.publish") version "0.30.0"
+    id("com.vanniktech.maven.publish") version "0.37.0"
 }
 
 group = "io.github.adventures92"
@@ -19,15 +19,15 @@ dependencies {
     implementation(kotlin("stdlib"))
 
     // YAML parsing
-    implementation("org.yaml:snakeyaml:2.2")
+    implementation("org.yaml:snakeyaml:2.4")
 
     // TOML parsing
     implementation("com.moandjiezana.toml:toml4j:0.7.2")
 
     // Test dependencies
-    testImplementation("io.kotest:kotest-runner-junit5:5.9.1")
-    testImplementation("io.kotest:kotest-property:5.9.1")
-    testImplementation("io.kotest:kotest-assertions-core:5.9.1")
+    testImplementation("io.kotest:kotest-runner-junit5:6.2.5")
+    testImplementation("io.kotest:kotest-property:6.2.5")
+    testImplementation("io.kotest:kotest-assertions-core:6.2.5")
     testImplementation(gradleTestKit())
 }
 
@@ -43,9 +43,16 @@ gradlePlugin {
 }
 
 mavenPublishing {
-    publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL)
+    // Central Portal is the only host from 0.33 onwards — the SonatypeHost argument this used to
+    // take was removed when the legacy OSSRH endpoints were retired. The release workflow runs
+    // `publishAndReleaseToMavenCentral`, which promotes the deployment once Central's validation
+    // passes; a plain `publishToMavenCentral` leaves it waiting for a manual Publish in the portal.
+    publishToMavenCentral()
 
-    signAllPublications()
+    // Sign only when a key is configured, so a local `publishToMavenLocal` works without one.
+    if (providers.gradleProperty("signingInMemoryKey").isPresent) {
+        signAllPublications()
+    }
 
     coordinates(group.toString(), "kenv-config", version.toString())
 
