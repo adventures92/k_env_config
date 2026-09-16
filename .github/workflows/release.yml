@@ -88,7 +88,7 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - uses: gradle/actions/setup-gradle@v5
+      - uses: gradle/actions/setup-gradle@v6
 
       - name: Test the plugin
         working-directory: kenv-plugin
@@ -130,7 +130,7 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - uses: gradle/actions/setup-gradle@v5
+      - uses: gradle/actions/setup-gradle@v6
 
       # publishAndReleaseToMavenCentral, not publishToMavenCentral: the latter uploads and then
       # waits for someone to press Publish in the portal, so a "successful" release never becomes
