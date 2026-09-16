@@ -1,0 +1,192 @@
+name: release
+
+# The only path to a published release.
+#
+# Normally invoked by tag-and-release.yml through workflow_call once a release pull request lands
+# on main. `push: tags` is kept for a tag pushed by hand, where it does fire.
+#
+# Replaces publish.yml, which triggered on `release: [released, prereleased]`. That works only
+# while a human creates the release in the web UI: GitHub suppresses workflow triggers for events
+# raised by GITHUB_TOKEN, so the moment a workflow creates the release, the trigger goes silent and
+# nothing publishes. Sockit was caught by that twice.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release, without the leading v (e.g. 0.2.0)"
+        required: true
+        type: string
+      dry_run:
+        description: "Run the gate but do not publish"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  # ------------------------------------------------------------------ 1. gate
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Resolve version
+        id: version
+        run: |
+          # `inputs.version` is set for both workflow_dispatch and workflow_call, and empty for a
+          # tag push. Branching on github.event_name would be wrong for workflow_call: that reports
+          # the ORIGINAL event (push to main), so GITHUB_REF_NAME would be "main", not a version.
+          VERSION="${{ inputs.version }}"
+          if [ -z "$VERSION" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          if ! printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "::error::'$VERSION' is not a semantic version"
+            exit 1
+          fi
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
+
+      # A tag with no changelog section ships a version nobody can find out anything about.
+      - name: Check CHANGELOG has an entry for this version
+        run: |
+          if ! grep -q "^## \[${{ steps.version.outputs.value }}\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no '## [${{ steps.version.outputs.value }}]' section"
+            exit 1
+          fi
+
+      # Central rejects a -SNAPSHOT, and it cannot be un-published. Fail before the upload.
+      - name: Reject snapshot versions
+        run: |
+          case "${{ steps.version.outputs.value }}" in
+            *-SNAPSHOT) echo "::error::Maven Central rejects -SNAPSHOT versions"; exit 1 ;;
+          esac
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v5
+
+      - name: Test the plugin
+        working-directory: kenv-plugin
+        run: ../gradlew test -PVERSION_NAME=${{ steps.version.outputs.value }}
+
+      - name: Assert tests actually ran
+        run: |
+          count=$(grep -ho 'tests="[0-9]*"' kenv-plugin/build/test-results/test/*.xml \
+                  | grep -o '[0-9]*' | awk '{s+=$1} END{print s+0}')
+          echo "tests executed: ${count:-0}"
+          [ "${count:-0}" -gt 0 ] || { echo "::error::test task ran but discovered no tests"; exit 1; }
+
+      # Central requires name, description, url, licence, developer and scm. Catch a missing one
+      # here rather than after the artifact is already uploaded.
+      - name: Check the POM is complete
+        working-directory: kenv-plugin
+        run: |
+          ../gradlew generatePomFileForPluginMavenPublication \
+            -PVERSION_NAME=${{ steps.version.outputs.value }} --no-configuration-cache
+          POM=build/publications/pluginMaven/pom-default.xml
+          for el in name description url licenses developers scm; do
+            grep -q "<$el>" "$POM" || { echo "::error::POM is missing <$el>"; exit 1; }
+          done
+          grep -q "<version>${{ steps.version.outputs.value }}</version>" "$POM" \
+            || { echo "::error::POM version does not match the release version"; exit 1; }
+          echo "POM complete, version $(grep -oE '<version>[^<]+' "$POM" | head -1 | sed 's/<version>//')"
+
+  # --------------------------------------------------------------- 2. publish
+  publish:
+    name: publish
+    needs: verify
+    if: ${{ !inputs.dry_run }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v5
+
+      # publishAndReleaseToMavenCentral, not publishToMavenCentral: the latter uploads and then
+      # waits for someone to press Publish in the portal, so a "successful" release never becomes
+      # downloadable. --no-configuration-cache because the signing tasks are not compatible with it.
+      - name: Publish to Maven Central
+        working-directory: kenv-plugin
+        run: >
+          ../gradlew publishAndReleaseToMavenCentral
+          -PVERSION_NAME=${{ needs.verify.outputs.version }}
+          --no-configuration-cache
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.SIGNING_KEY_ID }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_KEY_CONTENTS }}
+
+  # -------------------------------------------------------- 3. github release
+  github-release:
+    name: github-release
+    needs: [verify, publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      # Notes come from the curated CHANGELOG section, not from generated commit lists — the
+      # changelog is the document a reader actually wants.
+      - name: Extract this version's changelog section
+        run: |
+          awk -v v="${{ needs.verify.outputs.version }}" '
+            $0 ~ "^## \\[" v "\\]" { capture = 1; next }
+            capture && /^## \[/     { exit }
+            capture                 { print }
+          ' CHANGELOG.md > release-notes.md
+          test -s release-notes.md || { echo "::error::extracted empty release notes"; exit 1; }
+          {
+            echo ""
+            echo "---"
+            echo ""
+            echo '```kotlin'
+            echo 'plugins {'
+            echo '    id("io.github.adventures92.kenv-config") version "${{ needs.verify.outputs.version }}"'
+            echo '}'
+            echo '```'
+          } >> release-notes.md
+
+      - name: Publish the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ needs.verify.outputs.version }}" \
+            --title "v${{ needs.verify.outputs.version }}" \
+            --notes-file release-notes.md \
+            --verify-tag
+
+  # ------------------------------------------------------------------ 4. docs
+  # Called explicitly for the same reason release.yml is: a tag pushed with GITHUB_TOKEN does not
+  # trigger workflows, so docs.yml's own `push: tags` trigger would never fire for an automated
+  # release. Independent of publish — a Pages hiccup must not mark a successful publish as failed.
+  docs:
+    needs: verify
+    uses: ./.github/workflows/docs.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
