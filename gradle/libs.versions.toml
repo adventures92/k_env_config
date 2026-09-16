@@ -15,7 +15,7 @@ kotest = "6.2.5"
 kotlin = "2.4.20"
 material3 = "1.13.0-alpha01"
 mavenPublish = "0.37.0"
-snakeyaml = "2.4"
+snakeyaml = "2.7"
 toml4j = "0.7.2"
 
 [libraries]
