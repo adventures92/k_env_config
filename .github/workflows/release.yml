@@ -18,6 +18,15 @@ on:
       version:
         required: true
         type: string
+      # Declared here as well as under workflow_dispatch. The publish and docs jobs are gated on
+      # `inputs.dry_run`, and GitHub validates every `inputs.*` reference against the inputs the
+      # *calling* trigger declares — not the union of all triggers. With this missing, calling the
+      # workflow from tag-and-release.yml failed with `startup_failure` before a single job ran,
+      # including the job that creates the tag. A caller never wants a dry run, hence false.
+      dry_run:
+        required: false
+        default: false
+        type: boolean
   workflow_dispatch:
     inputs:
       version:
