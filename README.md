@@ -24,7 +24,7 @@ Add to your `gradle/libs.versions.toml`:
 
 ```toml
 [versions]
-kenvConfig = "<latest>"
+kenvConfig = "0.2.0"
 
 [plugins]
 kenvConfig = { id = "io.github.adventures92.kenv-config", version.ref = "kenvConfig" }
@@ -44,7 +44,7 @@ In your module's `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("io.github.adventures92.kenv-config") version "<latest>"
+    id("io.github.adventures92.kenv-config") version "0.2.0"
 }
 ```
 

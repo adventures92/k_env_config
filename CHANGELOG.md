@@ -11,6 +11,8 @@ coordinates. Build, CI and refactoring changes do not; git history holds those.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-16
+
 ### Fixed
 
 - Schema files are no longer rewritten by YAML 1.1 implicit typing. The schema parser kept
@@ -53,5 +55,6 @@ files, so a missing or mistyped value fails the build instead of surfacing at ru
 - An incremental, cacheable `kenvGenerate` task, skipped when inputs are unchanged
 - A `.gitignore` advisory warning when env files are not ignored
 
-[Unreleased]: https://github.com/adventures92/k_env_config/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/adventures92/k_env_config/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/adventures92/k_env_config/releases/tag/v0.2.0
 [0.1.0]: https://github.com/adventures92/k_env_config/releases/tag/v0.1.0
