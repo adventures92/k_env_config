@@ -183,8 +183,13 @@ jobs:
   # Called explicitly for the same reason release.yml is: a tag pushed with GITHUB_TOKEN does not
   # trigger workflows, so docs.yml's own `push: tags` trigger would never fire for an automated
   # release. Independent of publish — a Pages hiccup must not mark a successful publish as failed.
+  #
+  # Skipped on a dry run, like publish and github-release. Without this it deployed to Pages during
+  # a rehearsal — harmless in effect, since it republishes the same commit's docs, but a dry run
+  # that changes something live is not a dry run.
   docs:
     needs: verify
+    if: ${{ !inputs.dry_run }}
     uses: ./.github/workflows/docs.yml
     permissions:
       contents: read
