@@ -9,87 +9,88 @@ import org.gradle.api.logging.Logger
 import org.slf4j.Marker
 import kotlin.io.path.createTempDirectory
 
-class GitignoreCheckerTest : FunSpec({
+class GitignoreCheckerTest :
+    FunSpec({
 
-    test("logs warning when .gitignore is missing from kenv directory") {
-        val tempDir = createTempDirectory("kenv-gitignore-test")
-        try {
-            val logger = TestLogger()
-            val checker = GitignoreChecker(logger)
+        test("logs warning when .gitignore is missing from kenv directory") {
+            val tempDir = createTempDirectory("kenv-gitignore-test")
+            try {
+                val logger = TestLogger()
+                val checker = GitignoreChecker(logger)
 
-            checker.check(tempDir.toFile())
+                checker.check(tempDir.toFile())
 
-            logger.warnings.size shouldBe 1
-            val warning = logger.warnings.first()
-            warning shouldContain ".gitignore"
-            warning shouldContain "env.production.*"
-            warning shouldContain "env.global.*"
-        } finally {
-            tempDir.toFile().deleteRecursively()
+                logger.warnings.size shouldBe 1
+                val warning = logger.warnings.first()
+                warning shouldContain ".gitignore"
+                warning shouldContain "env.production.*"
+                warning shouldContain "env.global.*"
+            } finally {
+                tempDir.toFile().deleteRecursively()
+            }
         }
-    }
 
-    test("silent when .gitignore is present in kenv directory") {
-        val tempDir = createTempDirectory("kenv-gitignore-test")
-        try {
-            // Create a .gitignore file in the directory
-            tempDir.resolve(".gitignore").toFile().writeText("env.production.*\nenv.global.*\n")
+        test("silent when .gitignore is present in kenv directory") {
+            val tempDir = createTempDirectory("kenv-gitignore-test")
+            try {
+                // Create a .gitignore file in the directory
+                tempDir.resolve(".gitignore").toFile().writeText("env.production.*\nenv.global.*\n")
 
-            val logger = TestLogger()
-            val checker = GitignoreChecker(logger)
+                val logger = TestLogger()
+                val checker = GitignoreChecker(logger)
 
-            checker.check(tempDir.toFile())
+                checker.check(tempDir.toFile())
 
-            logger.warnings.shouldBeEmpty()
-        } finally {
-            tempDir.toFile().deleteRecursively()
+                logger.warnings.shouldBeEmpty()
+            } finally {
+                tempDir.toFile().deleteRecursively()
+            }
         }
-    }
 
-    test("never creates or modifies files in the kenv directory") {
-        val tempDir = createTempDirectory("kenv-gitignore-test")
-        try {
-            // Record the initial state of the directory (empty)
-            val filesBefore = tempDir.toFile().listFiles()?.map { it.name }?.toSet() ?: emptySet()
+        test("never creates or modifies files in the kenv directory") {
+            val tempDir = createTempDirectory("kenv-gitignore-test")
+            try {
+                // Record the initial state of the directory (empty)
+                val filesBefore = tempDir.toFile().listFiles()?.map { it.name }?.toSet() ?: emptySet()
 
-            val logger = TestLogger()
-            val checker = GitignoreChecker(logger)
+                val logger = TestLogger()
+                val checker = GitignoreChecker(logger)
 
-            checker.check(tempDir.toFile())
+                checker.check(tempDir.toFile())
 
-            // Verify no files were created
-            val filesAfter = tempDir.toFile().listFiles()?.map { it.name }?.toSet() ?: emptySet()
-            filesAfter shouldBe filesBefore
-        } finally {
-            tempDir.toFile().deleteRecursively()
+                // Verify no files were created
+                val filesAfter = tempDir.toFile().listFiles()?.map { it.name }?.toSet() ?: emptySet()
+                filesAfter shouldBe filesBefore
+            } finally {
+                tempDir.toFile().deleteRecursively()
+            }
         }
-    }
 
-    test("never creates or modifies files even when .gitignore already exists") {
-        val tempDir = createTempDirectory("kenv-gitignore-test")
-        try {
-            // Create a .gitignore with known content
-            val gitignoreFile = tempDir.resolve(".gitignore").toFile()
-            val originalContent = "*.secret\n"
-            gitignoreFile.writeText(originalContent)
-            val lastModified = gitignoreFile.lastModified()
+        test("never creates or modifies files even when .gitignore already exists") {
+            val tempDir = createTempDirectory("kenv-gitignore-test")
+            try {
+                // Create a .gitignore with known content
+                val gitignoreFile = tempDir.resolve(".gitignore").toFile()
+                val originalContent = "*.secret\n"
+                gitignoreFile.writeText(originalContent)
+                val lastModified = gitignoreFile.lastModified()
 
-            // Small delay to ensure any modification would have a different timestamp
-            Thread.sleep(50)
+                // Small delay to ensure any modification would have a different timestamp
+                Thread.sleep(50)
 
-            val logger = TestLogger()
-            val checker = GitignoreChecker(logger)
+                val logger = TestLogger()
+                val checker = GitignoreChecker(logger)
 
-            checker.check(tempDir.toFile())
+                checker.check(tempDir.toFile())
 
-            // Verify .gitignore was not modified
-            gitignoreFile.readText() shouldBe originalContent
-            gitignoreFile.lastModified() shouldBe lastModified
-        } finally {
-            tempDir.toFile().deleteRecursively()
+                // Verify .gitignore was not modified
+                gitignoreFile.readText() shouldBe originalContent
+                gitignoreFile.lastModified() shouldBe lastModified
+            } finally {
+                tempDir.toFile().deleteRecursively()
+            }
         }
-    }
-})
+    })
 
 /**
  * A minimal test Logger implementation that captures warn() messages.
@@ -165,16 +166,36 @@ private class TestLogger : Logger {
     // Warn — capture messages
     override fun isWarnEnabled(): Boolean = true
     override fun isWarnEnabled(marker: Marker?): Boolean = true
-    override fun warn(msg: String?) { warnings.add(msg ?: "") }
-    override fun warn(format: String?, arg: Any?) { warnings.add(format ?: "") }
-    override fun warn(format: String?, arg1: Any?, arg2: Any?) { warnings.add(format ?: "") }
-    override fun warn(format: String?, vararg arguments: Any?) { warnings.add(format ?: "") }
-    override fun warn(msg: String?, t: Throwable?) { warnings.add(msg ?: "") }
-    override fun warn(marker: Marker?, msg: String?) { warnings.add(msg ?: "") }
-    override fun warn(marker: Marker?, format: String?, arg: Any?) { warnings.add(format ?: "") }
-    override fun warn(marker: Marker?, format: String?, arg1: Any?, arg2: Any?) { warnings.add(format ?: "") }
-    override fun warn(marker: Marker?, format: String?, vararg arguments: Any?) { warnings.add(format ?: "") }
-    override fun warn(marker: Marker?, msg: String?, t: Throwable?) { warnings.add(msg ?: "") }
+    override fun warn(msg: String?) {
+        warnings.add(msg ?: "")
+    }
+    override fun warn(format: String?, arg: Any?) {
+        warnings.add(format ?: "")
+    }
+    override fun warn(format: String?, arg1: Any?, arg2: Any?) {
+        warnings.add(format ?: "")
+    }
+    override fun warn(format: String?, vararg arguments: Any?) {
+        warnings.add(format ?: "")
+    }
+    override fun warn(msg: String?, t: Throwable?) {
+        warnings.add(msg ?: "")
+    }
+    override fun warn(marker: Marker?, msg: String?) {
+        warnings.add(msg ?: "")
+    }
+    override fun warn(marker: Marker?, format: String?, arg: Any?) {
+        warnings.add(format ?: "")
+    }
+    override fun warn(marker: Marker?, format: String?, arg1: Any?, arg2: Any?) {
+        warnings.add(format ?: "")
+    }
+    override fun warn(marker: Marker?, format: String?, vararg arguments: Any?) {
+        warnings.add(format ?: "")
+    }
+    override fun warn(marker: Marker?, msg: String?, t: Throwable?) {
+        warnings.add(msg ?: "")
+    }
 
     // Error
     override fun isErrorEnabled(): Boolean = false

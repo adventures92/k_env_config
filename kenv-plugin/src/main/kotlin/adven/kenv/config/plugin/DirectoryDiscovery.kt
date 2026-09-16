@@ -4,8 +4,8 @@ import java.io.File
 
 data class DiscoveredFiles(
     val schemaFile: File,
-    val envFiles: Map<String, File>,  // environment name -> file
-    val globalFile: File?
+    val envFiles: Map<String, File>, // environment name -> file
+    val globalFile: File?,
 )
 
 class DirectoryDiscovery {
@@ -19,7 +19,7 @@ class DirectoryDiscovery {
             discoverEnvFile(directory, envName)
                 ?: throw IllegalStateException(
                     "Environment file not found for '$envName': " +
-                    "expected env.$envName.<env|yaml|yml|toml> in ${directory.absolutePath}"
+                        "expected env.$envName.<env|yaml|yml|toml> in ${directory.absolutePath}",
                 )
         }
 
@@ -28,7 +28,7 @@ class DirectoryDiscovery {
         return DiscoveredFiles(
             schemaFile = schemaFile,
             envFiles = envFiles,
-            globalFile = globalFile
+            globalFile = globalFile,
         )
     }
 

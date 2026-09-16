@@ -29,9 +29,9 @@ class YamlEnvParser : EnvFileParser {
                         message = e.problem ?: "Invalid YAML syntax",
                         filePath = filePath,
                         line = line,
-                        column = e.problemMark?.column?.plus(1)
-                    )
-                )
+                        column = e.problemMark?.column?.plus(1),
+                    ),
+                ),
             )
         } catch (e: Exception) {
             return ParseResult.Failure(
@@ -40,9 +40,9 @@ class YamlEnvParser : EnvFileParser {
                         message = e.message ?: "Invalid YAML syntax",
                         filePath = filePath,
                         line = 1,
-                        column = null
-                    )
-                )
+                        column = null,
+                    ),
+                ),
             )
         }
 
@@ -53,8 +53,8 @@ class YamlEnvParser : EnvFileParser {
                     name = environmentName,
                     values = emptyMap(),
                     format = EnvFileFormat.YAML,
-                    sourceFile = filePath
-                )
+                    sourceFile = filePath,
+                ),
             )
         }
 
@@ -66,9 +66,9 @@ class YamlEnvParser : EnvFileParser {
                         message = "Expected a YAML mapping (key-value pairs) at the top level",
                         filePath = filePath,
                         line = 1,
-                        column = null
-                    )
-                )
+                        column = null,
+                    ),
+                ),
             )
         }
 
@@ -88,8 +88,8 @@ class YamlEnvParser : EnvFileParser {
                         message = "Nested structures are not supported in environment files. Key '$keyStr' must have a scalar value.",
                         filePath = filePath,
                         line = lineNumber,
-                        column = null
-                    )
+                        column = null,
+                    ),
                 )
                 continue
             }
@@ -105,8 +105,8 @@ class YamlEnvParser : EnvFileParser {
                     name = environmentName,
                     values = values,
                     format = EnvFileFormat.YAML,
-                    sourceFile = filePath
-                )
+                    sourceFile = filePath,
+                ),
             )
         }
     }

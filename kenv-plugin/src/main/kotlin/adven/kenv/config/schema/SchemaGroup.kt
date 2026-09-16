@@ -8,5 +8,5 @@ package adven.kenv.config.schema
  */
 data class SchemaGroup(
     val name: String,
-    val variables: List<SchemaVariable>
+    val variables: List<SchemaVariable>,
 )

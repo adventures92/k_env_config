@@ -28,6 +28,6 @@ interface CodeGenerator {
         configs: Map<String, EnvironmentConfig>,
         globalConfig: GlobalConfig?,
         activeEnvironment: String?,
-        className: String
+        className: String,
     ): String
 }

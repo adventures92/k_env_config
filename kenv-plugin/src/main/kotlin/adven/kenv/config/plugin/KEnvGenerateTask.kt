@@ -68,7 +68,7 @@ abstract class KEnvGenerateTask : DefaultTask() {
         val schemaFile = dir.resolve("schema.kenv.yaml")
         if (!schemaFile.exists()) {
             throw GradleException(
-                "Schema file not found: expected schema.kenv.yaml in ${dir.absolutePath}"
+                "Schema file not found: expected schema.kenv.yaml in ${dir.absolutePath}",
             )
         }
 
@@ -98,7 +98,7 @@ abstract class KEnvGenerateTask : DefaultTask() {
         for (envName in envNames) {
             val envFile = discoveredFiles.envFiles[envName]
                 ?: throw GradleException(
-                    "Environment file not found for '$envName': expected env.$envName.<env|yaml|yml|toml> in ${dir.absolutePath}"
+                    "Environment file not found for '$envName': expected env.$envName.<env|yaml|yml|toml> in ${dir.absolutePath}",
                 )
 
             val format = EnvFileNaming.detectFormat(envFile.name)
@@ -151,7 +151,7 @@ abstract class KEnvGenerateTask : DefaultTask() {
             configs = configs,
             globalConfig = globalConfig,
             activeEnvironment = activeEnv,
-            className = className
+            className = className,
         )
 
         // 8. Write output
@@ -180,7 +180,7 @@ abstract class KEnvGenerateTask : DefaultTask() {
             is ParseResult.Success -> GlobalConfig(
                 values = result.value.values,
                 format = format,
-                sourceFile = file.path
+                sourceFile = file.path,
             )
             is ParseResult.Failure -> {
                 for (error in result.errors) {
@@ -194,33 +194,29 @@ abstract class KEnvGenerateTask : DefaultTask() {
     /**
      * Returns the appropriate parser for the given file format.
      */
-    private fun getParserForFormat(format: EnvFileFormat): EnvFileParser {
-        return when (format) {
-            EnvFileFormat.DOT_ENV -> DotEnvParser()
-            EnvFileFormat.YAML -> YamlEnvParser()
-            EnvFileFormat.TOML -> TomlEnvParser()
-        }
+    private fun getParserForFormat(format: EnvFileFormat): EnvFileParser = when (format) {
+        EnvFileFormat.DOT_ENV -> DotEnvParser()
+        EnvFileFormat.YAML -> YamlEnvParser()
+        EnvFileFormat.TOML -> TomlEnvParser()
     }
 
     /**
      * Formats a validation error into a human-readable string for logger output.
      */
-    private fun formatValidationError(error: adven.kenv.config.validation.ValidationError): String {
-        return when (error) {
-            is adven.kenv.config.validation.ValidationError.MissingVariable ->
-                "Missing required variable '${error.variableName}' in environment '${error.environmentName}'"
-            is adven.kenv.config.validation.ValidationError.MissingGlobalVariable ->
-                "Missing global variable '${error.variableName}': define in env.global.<ext>"
-            is adven.kenv.config.validation.ValidationError.TypeMismatch -> {
-                val location = if (error.environmentName != null) {
-                    "in environment '${error.environmentName}'"
-                } else {
-                    "for global variable"
-                }
-                "Type mismatch for '${error.variableName}' $location: expected ${error.expectedType}, got '${error.actualValue}'"
+    private fun formatValidationError(error: adven.kenv.config.validation.ValidationError): String = when (error) {
+        is adven.kenv.config.validation.ValidationError.MissingVariable ->
+            "Missing required variable '${error.variableName}' in environment '${error.environmentName}'"
+        is adven.kenv.config.validation.ValidationError.MissingGlobalVariable ->
+            "Missing global variable '${error.variableName}': define in env.global.<ext>"
+        is adven.kenv.config.validation.ValidationError.TypeMismatch -> {
+            val location = if (error.environmentName != null) {
+                "in environment '${error.environmentName}'"
+            } else {
+                "for global variable"
             }
-            is adven.kenv.config.validation.ValidationError.InvalidEnvironment ->
-                "Invalid activeEnvironment '${error.environmentName}'. Valid environments: ${error.validEnvironments}"
+            "Type mismatch for '${error.variableName}' $location: expected ${error.expectedType}, got '${error.actualValue}'"
         }
+        is adven.kenv.config.validation.ValidationError.InvalidEnvironment ->
+            "Invalid activeEnvironment '${error.environmentName}'. Valid environments: ${error.validEnvironments}"
     }
 }

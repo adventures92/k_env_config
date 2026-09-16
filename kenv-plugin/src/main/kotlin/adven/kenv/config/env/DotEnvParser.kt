@@ -36,8 +36,8 @@ class DotEnvParser : EnvFileParser {
                         message = "Expected KEY=value format",
                         filePath = filePath,
                         line = lineNumber,
-                        column = null
-                    )
+                        column = null,
+                    ),
                 )
                 continue
             }
@@ -49,8 +49,8 @@ class DotEnvParser : EnvFileParser {
                         message = "Empty key name",
                         filePath = filePath,
                         line = lineNumber,
-                        column = 1
-                    )
+                        column = 1,
+                    ),
                 )
                 continue
             }
@@ -61,8 +61,8 @@ class DotEnvParser : EnvFileParser {
                         message = "Invalid key name '$key': keys must contain only alphanumeric characters and underscores",
                         filePath = filePath,
                         line = lineNumber,
-                        column = 1
-                    )
+                        column = 1,
+                    ),
                 )
                 continue
             }
@@ -76,8 +76,8 @@ class DotEnvParser : EnvFileParser {
                         message = "Unterminated quoted string",
                         filePath = filePath,
                         line = lineNumber,
-                        column = equalsIndex + 2
-                    )
+                        column = equalsIndex + 2,
+                    ),
                 )
                 continue
             }
@@ -93,21 +93,17 @@ class DotEnvParser : EnvFileParser {
                     name = environmentName,
                     values = values,
                     format = EnvFileFormat.DOT_ENV,
-                    sourceFile = filePath
-                )
+                    sourceFile = filePath,
+                ),
             )
         }
     }
 
-    override fun print(config: EnvironmentConfig): String {
-        return config.values.entries.joinToString("\n") { (key, value) ->
-            "$key=${quoteIfNeeded(value)}"
-        }
+    override fun print(config: EnvironmentConfig): String = config.values.entries.joinToString("\n") { (key, value) ->
+        "$key=${quoteIfNeeded(value)}"
     }
 
-    private fun isValidKey(key: String): Boolean {
-        return key.all { it.isLetterOrDigit() || it == '_' || it == '.' }
-    }
+    private fun isValidKey(key: String): Boolean = key.all { it.isLetterOrDigit() || it == '_' || it == '.' }
 
     /**
      * Parses the value portion of a KEY=value line.

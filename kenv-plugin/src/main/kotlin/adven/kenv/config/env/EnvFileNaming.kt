@@ -21,7 +21,7 @@ object EnvFileNaming {
         "env" to EnvFileFormat.DOT_ENV,
         "yaml" to EnvFileFormat.YAML,
         "yml" to EnvFileFormat.YAML,
-        "toml" to EnvFileFormat.TOML
+        "toml" to EnvFileFormat.TOML,
     )
 
     /**

@@ -3,8 +3,10 @@ package adven.kenv.config.generators
 import adven.kenv.config.env.EnvFileFormat
 import adven.kenv.config.env.EnvironmentConfig
 import adven.kenv.config.env.GlobalConfig
-import adven.kenv.config.schema.*
-import adven.kenv.config.validation.canParse
+import adven.kenv.config.schema.Schema
+import adven.kenv.config.schema.SchemaType
+import adven.kenv.config.schema.SchemaVariable
+import adven.kenv.config.schema.VariableScope
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.*
 
@@ -68,7 +70,7 @@ object EnvConfigGenerators {
             name = name,
             values = values,
             format = format,
-            sourceFile = "env.$name.${formatExtension(format)}"
+            sourceFile = "env.$name.${formatExtension(format)}",
         )
     }
 
@@ -98,7 +100,7 @@ object EnvConfigGenerators {
             "http://localhost",
             "https://example.com",
             "http://api.test.io/v1",
-            "https://myapp.dev:8080"
+            "https://myapp.dev:8080",
         )
     }
 
@@ -135,7 +137,7 @@ object EnvConfigGenerators {
             name = envName,
             values = values,
             format = EnvFileFormat.DOT_ENV,
-            sourceFile = "env.$envName.env"
+            sourceFile = "env.$envName.env",
         )
     }
 
@@ -156,7 +158,7 @@ object EnvConfigGenerators {
         GlobalConfig(
             values = values,
             format = EnvFileFormat.DOT_ENV,
-            sourceFile = "env.global.env"
+            sourceFile = "env.global.env",
         )
     }
 
@@ -175,7 +177,7 @@ object EnvConfigGenerators {
                 name = envName,
                 values = emptyMap(),
                 format = EnvFileFormat.DOT_ENV,
-                sourceFile = "env.$envName.env"
+                sourceFile = "env.$envName.env",
             )
         }
 
@@ -192,7 +194,7 @@ object EnvConfigGenerators {
             name = envName,
             values = values,
             format = EnvFileFormat.DOT_ENV,
-            sourceFile = "env.$envName.env"
+            sourceFile = "env.$envName.env",
         )
     }
 
@@ -209,7 +211,7 @@ object EnvConfigGenerators {
             return@arbitrary GlobalConfig(
                 values = emptyMap(),
                 format = EnvFileFormat.DOT_ENV,
-                sourceFile = "env.global.env"
+                sourceFile = "env.global.env",
             )
         }
 
@@ -224,7 +226,7 @@ object EnvConfigGenerators {
         GlobalConfig(
             values = values,
             format = EnvFileFormat.DOT_ENV,
-            sourceFile = "env.global.env"
+            sourceFile = "env.global.env",
         )
     }
 
@@ -261,7 +263,7 @@ object EnvConfigGenerators {
             name = envName,
             values = values,
             format = EnvFileFormat.DOT_ENV,
-            sourceFile = "env.$envName.env"
+            sourceFile = "env.$envName.env",
         )
     }
 
@@ -296,7 +298,7 @@ object EnvConfigGenerators {
             name = envName,
             values = values,
             format = EnvFileFormat.DOT_ENV,
-            sourceFile = "env.$envName.env"
+            sourceFile = "env.$envName.env",
         )
     }
 

@@ -13,7 +13,7 @@ sealed class ValidationError {
      */
     data class MissingVariable(
         val variableName: String,
-        val environmentName: String
+        val environmentName: String,
     ) : ValidationError()
 
     /**
@@ -21,7 +21,7 @@ sealed class ValidationError {
      * and is absent from the global values file.
      */
     data class MissingGlobalVariable(
-        val variableName: String
+        val variableName: String,
     ) : ValidationError()
 
     /**
@@ -31,7 +31,7 @@ sealed class ValidationError {
         val variableName: String,
         val expectedType: SchemaType,
         val actualValue: String,
-        val environmentName: String?
+        val environmentName: String?,
     ) : ValidationError()
 
     /**
@@ -39,6 +39,6 @@ sealed class ValidationError {
      */
     data class InvalidEnvironment(
         val environmentName: String,
-        val validEnvironments: List<String>
+        val validEnvironments: List<String>,
     ) : ValidationError()
 }

@@ -6,6 +6,7 @@ package adven.kenv.config.schema
 enum class VariableScope {
     /** Single value shared across all environments, defined via schema default or env.global file */
     GLOBAL,
+
     /** Must be defined in every declared environment file */
-    ENVIRONMENT
+    ENVIRONMENT,
 }

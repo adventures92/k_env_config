@@ -17,7 +17,7 @@ class DefaultValidator : Validator {
         schema: Schema,
         configs: Map<String, EnvironmentConfig>,
         globalConfig: GlobalConfig?,
-        activeEnvironment: String?
+        activeEnvironment: String?,
     ): ValidationResult {
         val errors = mutableListOf<ValidationError>()
         val warnings = mutableListOf<ValidationWarning>()
@@ -27,8 +27,8 @@ class DefaultValidator : Validator {
             errors.add(
                 ValidationError.InvalidEnvironment(
                     environmentName = activeEnvironment,
-                    validEnvironments = schema.environments
-                )
+                    validEnvironments = schema.environments,
+                ),
             )
         }
 
@@ -45,8 +45,8 @@ class DefaultValidator : Validator {
                     errors.add(
                         ValidationError.MissingVariable(
                             variableName = variable.name,
-                            environmentName = envName
-                        )
+                            environmentName = envName,
+                        ),
                     )
                 } else if (!canParse(value, variable.type)) {
                     errors.add(
@@ -54,8 +54,8 @@ class DefaultValidator : Validator {
                             variableName = variable.name,
                             expectedType = variable.type,
                             actualValue = value,
-                            environmentName = envName
-                        )
+                            environmentName = envName,
+                        ),
                     )
                 }
             }
@@ -69,8 +69,8 @@ class DefaultValidator : Validator {
             if (globalValue == null) {
                 errors.add(
                     ValidationError.MissingGlobalVariable(
-                        variableName = variable.name
-                    )
+                        variableName = variable.name,
+                    ),
                 )
             } else if (!canParse(globalValue, variable.type)) {
                 errors.add(
@@ -78,8 +78,8 @@ class DefaultValidator : Validator {
                         variableName = variable.name,
                         expectedType = variable.type,
                         actualValue = globalValue,
-                        environmentName = null
-                    )
+                        environmentName = null,
+                    ),
                 )
             }
         }
@@ -92,8 +92,8 @@ class DefaultValidator : Validator {
                         ValidationWarning(
                             variableName = key,
                             environmentName = envName,
-                            message = "Variable '$key' in environment '$envName' is not declared in schema"
-                        )
+                            message = "Variable '$key' in environment '$envName' is not declared in schema",
+                        ),
                     )
                 }
             }
@@ -107,8 +107,8 @@ class DefaultValidator : Validator {
                         ValidationWarning(
                             variableName = key,
                             environmentName = null,
-                            message = "Variable '$key' in global config is not declared in schema"
-                        )
+                            message = "Variable '$key' in global config is not declared in schema",
+                        ),
                     )
                 }
             }

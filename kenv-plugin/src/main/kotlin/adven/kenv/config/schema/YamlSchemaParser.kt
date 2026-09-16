@@ -23,9 +23,9 @@ class YamlSchemaParser : SchemaParser {
                             message = "Schema file is empty",
                             filePath = filePath,
                             line = 1,
-                            column = null
-                        )
-                    )
+                            column = null,
+                        ),
+                    ),
                 )
             }
             if (parsed !is Map<*, *>) {
@@ -35,9 +35,9 @@ class YamlSchemaParser : SchemaParser {
                             message = "Schema must be a YAML mapping at the top level",
                             filePath = filePath,
                             line = 1,
-                            column = null
-                        )
-                    )
+                            column = null,
+                        ),
+                    ),
                 )
             }
             @Suppress("UNCHECKED_CAST")
@@ -51,9 +51,9 @@ class YamlSchemaParser : SchemaParser {
                         message = "Invalid YAML: ${e.problem ?: e.message}",
                         filePath = filePath,
                         line = line,
-                        column = column
-                    )
-                )
+                        column = column,
+                    ),
+                ),
             )
         } catch (e: Exception) {
             return ParseResult.Failure(
@@ -62,9 +62,9 @@ class YamlSchemaParser : SchemaParser {
                         message = "Invalid YAML: ${e.message}",
                         filePath = filePath,
                         line = 1,
-                        column = null
-                    )
-                )
+                        column = null,
+                    ),
+                ),
             )
         }
 
@@ -90,8 +90,8 @@ class YamlSchemaParser : SchemaParser {
             Schema(
                 environments = environments,
                 variables = variables,
-                groups = groups
-            )
+                groups = groups,
+            ),
         )
     }
 
@@ -155,7 +155,7 @@ class YamlSchemaParser : SchemaParser {
     private fun parseEnvironments(
         root: Map<String, Any?>,
         filePath: String,
-        errors: MutableList<ParseError>
+        errors: MutableList<ParseError>,
     ): List<String> {
         val envValue = root["environments"]
         if (envValue == null) {
@@ -164,8 +164,8 @@ class YamlSchemaParser : SchemaParser {
                     message = "Missing required 'environments' list",
                     filePath = filePath,
                     line = 1,
-                    column = null
-                )
+                    column = null,
+                ),
             )
             return emptyList()
         }
@@ -175,8 +175,8 @@ class YamlSchemaParser : SchemaParser {
                     message = "'environments' must be a list",
                     filePath = filePath,
                     line = 1,
-                    column = null
-                )
+                    column = null,
+                ),
             )
             return emptyList()
         }
@@ -186,8 +186,8 @@ class YamlSchemaParser : SchemaParser {
                     message = "'environments' list must not be empty",
                     filePath = filePath,
                     line = 1,
-                    column = null
-                )
+                    column = null,
+                ),
             )
             return emptyList()
         }
@@ -197,7 +197,7 @@ class YamlSchemaParser : SchemaParser {
     private fun parseVariables(
         variablesValue: Any?,
         filePath: String,
-        errors: MutableList<ParseError>
+        errors: MutableList<ParseError>,
     ): List<SchemaVariable> {
         if (variablesValue == null) return emptyList()
         if (variablesValue !is Map<*, *>) {
@@ -206,8 +206,8 @@ class YamlSchemaParser : SchemaParser {
                     message = "'variables' must be a mapping",
                     filePath = filePath,
                     line = 1,
-                    column = null
-                )
+                    column = null,
+                ),
             )
             return emptyList()
         }
@@ -227,7 +227,7 @@ class YamlSchemaParser : SchemaParser {
         name: String,
         value: Any?,
         filePath: String,
-        errors: MutableList<ParseError>
+        errors: MutableList<ParseError>,
     ): SchemaVariable? {
         if (value !is Map<*, *>) {
             errors.add(
@@ -235,8 +235,8 @@ class YamlSchemaParser : SchemaParser {
                     message = "Variable '$name' must be a mapping with at least a 'type' field",
                     filePath = filePath,
                     line = 1,
-                    column = null
-                )
+                    column = null,
+                ),
             )
             return null
         }
@@ -248,8 +248,8 @@ class YamlSchemaParser : SchemaParser {
                     message = "Variable '$name' is missing required 'type' field",
                     filePath = filePath,
                     line = 1,
-                    column = null
-                )
+                    column = null,
+                ),
             )
             return null
         }
@@ -261,8 +261,8 @@ class YamlSchemaParser : SchemaParser {
                     message = "Unknown type '$typeStr' for variable '$name'. Valid types: String, Int, Long, Double, Float, Boolean, Url",
                     filePath = filePath,
                     line = 1,
-                    column = null
-                )
+                    column = null,
+                ),
             )
             return null
         }
@@ -276,8 +276,8 @@ class YamlSchemaParser : SchemaParser {
                             message = "Unknown scope '$scopeStr' for variable '$name'. Valid scopes: global, environment",
                             filePath = filePath,
                             line = 1,
-                            column = null
-                        )
+                            column = null,
+                        ),
                     )
                     return null
                 }
@@ -292,8 +292,8 @@ class YamlSchemaParser : SchemaParser {
                     message = "Variable '$name' contains a 'default' field which is not supported in v2. All values must be provided in environment files.",
                     filePath = filePath,
                     line = 1,
-                    column = null
-                )
+                    column = null,
+                ),
             )
             return null
         }
@@ -304,14 +304,14 @@ class YamlSchemaParser : SchemaParser {
             name = name,
             type = type,
             scope = scope,
-            description = description
+            description = description,
         )
     }
 
     private fun parseGroups(
         groupsValue: Any?,
         filePath: String,
-        errors: MutableList<ParseError>
+        errors: MutableList<ParseError>,
     ): List<SchemaGroup> {
         if (groupsValue == null) return emptyList()
         if (groupsValue !is Map<*, *>) {
@@ -320,8 +320,8 @@ class YamlSchemaParser : SchemaParser {
                     message = "'groups' must be a mapping",
                     filePath = filePath,
                     line = 1,
-                    column = null
-                )
+                    column = null,
+                ),
             )
             return emptyList()
         }
@@ -335,8 +335,8 @@ class YamlSchemaParser : SchemaParser {
                         message = "Group '$groupName' must be a mapping of variables",
                         filePath = filePath,
                         line = 1,
-                        column = null
-                    )
+                        column = null,
+                    ),
                 )
                 continue
             }

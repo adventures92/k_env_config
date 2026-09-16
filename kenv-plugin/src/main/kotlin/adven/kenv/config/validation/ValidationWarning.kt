@@ -11,5 +11,5 @@ package adven.kenv.config.validation
 data class ValidationWarning(
     val variableName: String,
     val environmentName: String?,
-    val message: String
+    val message: String,
 )

@@ -11,5 +11,5 @@ package adven.kenv.config.env
 data class GlobalConfig(
     val values: Map<String, String>,
     val format: EnvFileFormat,
-    val sourceFile: String
+    val sourceFile: String,
 )

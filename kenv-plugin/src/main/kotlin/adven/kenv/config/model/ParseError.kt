@@ -12,5 +12,5 @@ data class ParseError(
     val message: String,
     val filePath: String,
     val line: Int,
-    val column: Int?
+    val column: Int?,
 )

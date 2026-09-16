@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:YamlEnvParser.kt$YamlEnvParser$private fun yamlQuoteIfNeeded(value: String): String</ID>
+    <ID>LongMethod:DefaultCodeGenerator.kt$DefaultCodeGenerator$private fun generateMultiEnvironment( builder: StringBuilder, schema: Schema, configs: Map&lt;String, EnvironmentConfig&gt;, globalConfig: GlobalConfig?, className: String, )</ID>
+    <ID>LongMethod:DefaultValidator.kt$DefaultValidator$override fun validate( schema: Schema, configs: Map&lt;String, EnvironmentConfig&gt;, globalConfig: GlobalConfig?, activeEnvironment: String?, ): ValidationResult</ID>
+    <ID>LongMethod:DotEnvParser.kt$DotEnvParser$override fun parse(content: String, filePath: String, environmentName: String): ParseResult&lt;EnvironmentConfig&gt;</ID>
+    <ID>LongMethod:KEnvGenerateTask.kt$KEnvGenerateTask$@TaskAction fun generate()</ID>
+    <ID>LongMethod:TomlEnvParser.kt$TomlEnvParser$override fun parse(content: String, filePath: String, environmentName: String): ParseResult&lt;EnvironmentConfig&gt;</ID>
+    <ID>LongMethod:YamlEnvParser.kt$YamlEnvParser$override fun parse(content: String, filePath: String, environmentName: String): ParseResult&lt;EnvironmentConfig&gt;</ID>
+    <ID>LongMethod:YamlSchemaParser.kt$YamlSchemaParser$override fun parse(content: String, filePath: String): ParseResult&lt;Schema&gt;</ID>
+    <ID>LongMethod:YamlSchemaParser.kt$YamlSchemaParser$private fun parseVariable( name: String, value: Any?, filePath: String, errors: MutableList&lt;ParseError&gt;, ): SchemaVariable?</ID>
+    <ID>NestedBlockDepth:DefaultCodeGenerator.kt$DefaultCodeGenerator$private fun generateMultiEnvironment( builder: StringBuilder, schema: Schema, configs: Map&lt;String, EnvironmentConfig&gt;, globalConfig: GlobalConfig?, className: String, )</ID>
+    <ID>NestedBlockDepth:DefaultCodeGenerator.kt$DefaultCodeGenerator$private fun generateRuntimeGroupObject( builder: StringBuilder, group: SchemaGroup, configs: Map&lt;String, EnvironmentConfig&gt;, globalConfig: GlobalConfig?, environments: List&lt;String&gt;, className: String, indent: Int, )</ID>
+    <ID>ReturnCount:YamlSchemaParser.kt$YamlSchemaParser$override fun parse(content: String, filePath: String): ParseResult&lt;Schema&gt;</ID>
+    <ID>ReturnCount:YamlSchemaParser.kt$YamlSchemaParser$private fun parseVariable( name: String, value: Any?, filePath: String, errors: MutableList&lt;ParseError&gt;, ): SchemaVariable?</ID>
+    <ID>ThrowsCount:KEnvGenerateTask.kt$KEnvGenerateTask$@TaskAction fun generate()</ID>
+    <ID>UnusedParameter:DotEnvParser.kt$DotEnvParser$filePath: String</ID>
+    <ID>UnusedParameter:DotEnvParser.kt$DotEnvParser$lineNumber: Int</ID>
+    <ID>UnusedPrivateProperty:VariantMappingDsl.kt$VariantMappingDsl$objects: ObjectFactory</ID>
+  </CurrentIssues>
+</SmellBaseline>

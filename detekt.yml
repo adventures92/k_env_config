@@ -1,0 +1,75 @@
+# detekt configuration, shared by every Kotlin source set that runs the `detekt` task.
+#
+# `buildUponDefaultConfig = true` is set in kenv-plugin/build.gradle.kts, so this file only states
+# the deltas from detekt's own defaults — anything not mentioned keeps the default.
+#
+# `maxIssues: 0` means any finding fails the build. That is the point: a threshold above zero turns
+# into a budget nobody ever spends down. If a rule is genuinely wrong for this codebase, turn the
+# rule off here with a reason rather than raising the ceiling.
+
+build:
+  maxIssues: 0
+  excludeCorrectable: false
+
+config:
+  validation: true
+  warningsAsErrors: false
+
+processors:
+  active: true
+
+console-reports:
+  active: true
+
+output-reports:
+  active: true
+
+complexity:
+  ComplexCondition:
+    active: true
+    threshold: 6
+  CyclomaticComplexMethod:
+    active: true
+    threshold: 25
+  LongParameterList:
+    active: true
+    functionThreshold: 12
+    constructorThreshold: 20
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 40
+    thresholdInClasses: 40
+    thresholdInInterfaces: 12
+    thresholdInObjects: 20
+    thresholdInEnums: 20
+
+naming:
+  FunctionNaming:
+    active: true
+  MatchingDeclarationName:
+    active: true
+
+style:
+  LoopWithTooManyJumpStatements:
+    active: false
+  MagicNumber:
+    active: false
+  MaxLineLength:
+    active: true
+    maxLineLength: 160
+  ReturnCount:
+    active: true
+    max: 5
+  ThrowsCount:
+    active: true
+    max: 5
+  UnusedParameter:
+    active: true
+  UseRequire:
+    active: false
+  WildcardImport:
+    active: true
+
+exceptions:
+  TooGenericExceptionCaught:
+    active: false

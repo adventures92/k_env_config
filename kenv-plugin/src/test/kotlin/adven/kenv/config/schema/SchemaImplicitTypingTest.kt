@@ -18,45 +18,46 @@ import io.kotest.matchers.types.shouldBeInstanceOf
  * SCREAMING_SNAKE_CASE, and YAML 1.1 resolves `ON`, `OFF`, `YES`, `NO`, `Y` and `N` in any casing
  * as booleans, so a variable named `ON` silently became `true`.
  */
-class SchemaImplicitTypingTest : FunSpec({
+class SchemaImplicitTypingTest :
+    FunSpec({
 
-    val parser = YamlSchemaParser()
+        val parser = YamlSchemaParser()
 
-    fun parse(yaml: String): Schema {
-        val result = parser.parse(yaml.trimIndent(), "schema.kenv.yaml")
-        result.shouldBeInstanceOf<ParseResult.Success<Schema>>()
-        return result.value
-    }
+        fun parse(yaml: String): Schema {
+            val result = parser.parse(yaml.trimIndent(), "schema.kenv.yaml")
+            result.shouldBeInstanceOf<ParseResult.Success<Schema>>()
+            return result.value
+        }
 
-    test("environment names that YAML 1.1 reads as booleans keep their text") {
-        val schema = parse(
-            """
+        test("environment names that YAML 1.1 reads as booleans keep their text") {
+            val schema = parse(
+                """
             environments:
               - dev
               - no
               - on
               - off
               - yes
-            """
-        )
-        schema.environments shouldContainExactly listOf("dev", "no", "on", "off", "yes")
-    }
+            """,
+            )
+            schema.environments shouldContainExactly listOf("dev", "no", "on", "off", "yes")
+        }
 
-    test("an environment name that looks numeric is not renormalised") {
-        // 1.10 parsed as a Double becomes 1.1 — a different environment.
-        val schema = parse(
-            """
+        test("an environment name that looks numeric is not renormalised") {
+            // 1.10 parsed as a Double becomes 1.1 — a different environment.
+            val schema = parse(
+                """
             environments:
               - 1.10
               - 0755
-            """
-        )
-        schema.environments shouldContainExactly listOf("1.10", "0755")
-    }
+            """,
+            )
+            schema.environments shouldContainExactly listOf("1.10", "0755")
+        }
 
-    test("variable names that YAML 1.1 reads as booleans keep their text") {
-        val schema = parse(
-            """
+        test("variable names that YAML 1.1 reads as booleans keep their text") {
+            val schema = parse(
+                """
             environments:
               - dev
 
@@ -70,14 +71,14 @@ class SchemaImplicitTypingTest : FunSpec({
               API_PORT:
                 type: Int
                 scope: environment
-            """
-        )
-        schema.variables.map { it.name } shouldContainExactly listOf("ON", "NO", "API_PORT")
-    }
+            """,
+            )
+            schema.variables.map { it.name } shouldContainExactly listOf("ON", "NO", "API_PORT")
+        }
 
-    test("a group name that YAML 1.1 reads as a boolean keeps its text") {
-        val schema = parse(
-            """
+        test("a group name that YAML 1.1 reads as a boolean keeps its text") {
+            val schema = parse(
+                """
             environments:
               - dev
 
@@ -86,14 +87,14 @@ class SchemaImplicitTypingTest : FunSpec({
                 API_URL:
                   type: Url
                   scope: environment
-            """
-        )
-        schema.groups.map { it.name } shouldContainExactly listOf("on")
-    }
+            """,
+            )
+            schema.groups.map { it.name } shouldContainExactly listOf("on")
+        }
 
-    test("an unquoted description is not coerced") {
-        val schema = parse(
-            """
+        test("an unquoted description is not coerced") {
+            val schema = parse(
+                """
             environments:
               - dev
 
@@ -106,15 +107,15 @@ class SchemaImplicitTypingTest : FunSpec({
                 type: String
                 scope: environment
                 description: 1.10
-            """
-        )
-        schema.variables.first { it.name == "FEATURE_STATE" }.description shouldBe "no"
-        schema.variables.first { it.name == "VERSION_HINT" }.description shouldBe "1.10"
-    }
+            """,
+            )
+            schema.variables.first { it.name == "FEATURE_STATE" }.description shouldBe "no"
+            schema.variables.first { it.name == "VERSION_HINT" }.description shouldBe "1.10"
+        }
 
-    test("quoted scalars are unaffected, as they always were") {
-        val schema = parse(
-            """
+        test("quoted scalars are unaffected, as they always were") {
+            val schema = parse(
+                """
             environments:
               - "production"
 
@@ -123,9 +124,9 @@ class SchemaImplicitTypingTest : FunSpec({
                 type: String
                 scope: global
                 description: "Display name"
-            """
-        )
-        schema.environments shouldContainExactly listOf("production")
-        schema.variables.first().description shouldBe "Display name"
-    }
-})
+            """,
+            )
+            schema.environments shouldContainExactly listOf("production")
+            schema.variables.first().description shouldBe "Display name"
+        }
+    })
