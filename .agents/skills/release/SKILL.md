@@ -84,6 +84,22 @@ Reaching the plugin's own error (`generatedPackageName is required`) means resol
 
 ## Traps that have actually bitten this repo
 
+- **A dry run cannot test the release path.** `workflow_dispatch` runs on a branch and declares its
+  own inputs; a real release runs on a tag through `workflow_call`. The 0.2.0 release hit three
+  failures living in exactly that gap, after a completely green rehearsal:
+  `inputs.dry_run` undeclared on the `workflow_call` trigger (whole run dead with
+  `startup_failure`, before the tag job), Actions not permitted to open pull requests, and the
+  `github-pages` environment refusing to deploy from a tag ref. Run the rehearsal — it does prove
+  the gate — but do not read it as proof the release works.
+- **`publish: success` does not mean published.** The Gradle task returns once Central accepts the
+  upload and the release is *requested*; Central validates asynchronously afterwards, so a
+  validation failure never fails the build. Check `repo1.maven.org` for the artifact, and
+  <https://central.sonatype.com/publishing/deployments> for the deployment's real state. Expect
+  10–20 minutes before it appears.
+- **The javadoc jar is currently an empty stub.** Central requires the file but never inspects it,
+  so this passes validation silently. The sources jar is complete, so IDE navigation works; what
+  is missing is a rendered reference on javadoc.io. Fixing it means adding Dokka to the plugin
+  build and wiring `JavadocJar.Dokka(...)`.
 - **A tag pushed with `GITHUB_TOKEN` does not trigger workflows.** GitHub suppresses triggers for
   events raised by that token. `release.yml` and `docs.yml` are therefore `uses:`-called
   explicitly. If you ever "simplify" that back to a `push: tags` or `release:` trigger, releases
