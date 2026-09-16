@@ -95,7 +95,7 @@ info "Target: $REPO (default branch: $DEFAULT_BRANCH)"
 
 info "Repository metadata"
 run repo edit "$REPO" \
-    --description "Schema-based, type-safe environment variable management for Kotlin Multiplatform and Android" \
+    --description "Type-safe, schema-driven environment configuration for Kotlin Multiplatform and Android" \
     --homepage "https://adventures92.github.io/k_env_config/" \
     --add-topic kotlin \
     --add-topic gradle-plugin \
