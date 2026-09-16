@@ -2,15 +2,8 @@ package adven.kenv.config.env
 
 import adven.kenv.config.model.ParseError
 import adven.kenv.config.model.ParseResult
-import org.yaml.snakeyaml.DumperOptions
-import org.yaml.snakeyaml.LoaderOptions
-import org.yaml.snakeyaml.Yaml
-import org.yaml.snakeyaml.constructor.SafeConstructor
+import adven.kenv.config.yaml.StringOnlyYaml
 import org.yaml.snakeyaml.error.MarkedYAMLException
-import org.yaml.snakeyaml.nodes.Tag
-import org.yaml.snakeyaml.representer.Representer
-import org.yaml.snakeyaml.resolver.Resolver
-import java.util.regex.Pattern
 
 /**
  * Parser for YAML format environment files.
@@ -18,13 +11,13 @@ import java.util.regex.Pattern
  * Supports flat key-value YAML structures where all values are treated as strings.
  * Nested structures are not supported for environment files.
  *
- * Implicit type resolution is disabled (see [StringOnlyResolver]), so unquoted scalars
+ * Implicit type resolution is disabled (see [StringOnlyYaml]), so unquoted scalars
  * keep their literal text instead of being coerced by YAML's implicit typing rules.
  */
 class YamlEnvParser : EnvFileParser {
 
     override fun parse(content: String, filePath: String, environmentName: String): ParseResult<EnvironmentConfig> {
-        val yaml = newYaml()
+        val yaml = StringOnlyYaml.createLoader()
 
         val parsed: Any? = try {
             yaml.load<Any>(content)
@@ -188,37 +181,5 @@ class YamlEnvParser : EnvFileParser {
          * are quoted on output so they survive a round-trip through other YAML tooling.
          */
         val YAML_BOOLEAN_LITERALS = setOf("true", "false", "yes", "no", "on", "off", "y", "n")
-
-        /**
-         * Builds a [Yaml] that reads every scalar as a String.
-         *
-         * [SafeConstructor] additionally prevents arbitrary type instantiation from explicit
-         * tags in environment files.
-         */
-        fun newYaml(): Yaml {
-            val loaderOptions = LoaderOptions()
-            return Yaml(
-                SafeConstructor(loaderOptions),
-                Representer(DumperOptions()),
-                DumperOptions(),
-                loaderOptions,
-                StringOnlyResolver()
-            )
-        }
-    }
-
-    /**
-     * A [Resolver] that registers no implicit resolvers, so SnakeYAML falls back to
-     * `tag:yaml.org,2002:str` for every unquoted scalar.
-     *
-     * Without this, YAML 1.1 implicit typing silently rewrites environment values:
-     * `on` and `no` become booleans (`"on"` -> `"true"`), `1.10` becomes a Double
-     * (`"1.10"` -> `"1.1"`), and `0755` is read as octal (`"0755"` -> `"493"`).
-     * Environment values are always consumed as Strings, so implicit typing is never wanted.
-     */
-    private class StringOnlyResolver : Resolver() {
-        override fun addImplicitResolver(tag: Tag?, regexp: Pattern?, first: String?) = Unit
-
-        override fun addImplicitResolver(tag: Tag?, regexp: Pattern?, first: String?, limit: Int) = Unit
     }
 }

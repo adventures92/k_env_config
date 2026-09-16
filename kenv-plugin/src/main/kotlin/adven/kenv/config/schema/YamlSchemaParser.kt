@@ -2,7 +2,7 @@ package adven.kenv.config.schema
 
 import adven.kenv.config.model.ParseError
 import adven.kenv.config.model.ParseResult
-import org.yaml.snakeyaml.Yaml
+import adven.kenv.config.yaml.StringOnlyYaml
 import org.yaml.snakeyaml.error.MarkedYAMLException
 
 /**
@@ -10,7 +10,7 @@ import org.yaml.snakeyaml.error.MarkedYAMLException
  */
 class YamlSchemaParser : SchemaParser {
 
-    private val yaml = Yaml()
+    private val yaml = StringOnlyYaml.createLoader()
 
     override fun parse(content: String, filePath: String): ParseResult<Schema> {
         val root: Map<String, Any?>

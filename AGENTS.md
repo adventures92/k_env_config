@@ -75,15 +75,20 @@ Requires JDK 17+ (the plugin targets a 17 toolchain) and the Android SDK for the
 | `model/` | `ParseError` and `ParseResult` — the located-error types every parser returns |
 | `printer/` | Empty placeholder (`.gitkeep` only). Value quoting currently lives in `env/YamlEnvParser` |
 | `validation/` | Cross-checks schema against the env files — this is what turns a missing value into a build failure |
+| `yaml/` | `StringOnlyYaml` — the hardened loader **every** YAML parser here must use |
 | `codegen/` | Emits `EnvConfig.kt` |
 
 ### Parsing invariants
 
-- **No implicit retyping.** SnakeYAML's YAML 1.1 resolver coerces unquoted scalars, so `on` became
-  `"true"`, `no` became `"false"`, `1.10` became `"1.1"` and `0755` became `"493"`. `YamlEnvParser`
-  installs a `StringOnlyResolver` that registers no implicit resolvers, so every unquoted scalar
-  falls back to `tag:yaml.org,2002:str`. There are regression tests; do not weaken them.
-- **`SafeConstructor` on env files**, which blocks arbitrary type instantiation from explicit tags.
+- **No implicit retyping — in every parser.** SnakeYAML's YAML 1.1 resolver coerces unquoted
+  scalars, so `on` became `"true"`, `no` became `"false"`, `1.10` became `"1.1"` and `0755` became
+  `"493"`. `yaml/StringOnlyYaml` builds a loader whose resolver registers nothing, so every
+  unquoted scalar falls back to `tag:yaml.org,2002:str`. **Use it for any new YAML loading.** It
+  lives in its own package precisely because it did not: the hardening was once private to
+  `YamlEnvParser`, and the identical bug survived in `YamlSchemaParser` — where it was worse,
+  because map *keys* are affected too and a variable named `ON` became `true`. There are
+  regression tests on both sides; do not weaken them.
+- **`SafeConstructor` on every YAML load**, which blocks arbitrary type instantiation from explicit tags.
   Note SnakeYAML 2.x already refuses global tags by default — this is defence in depth.
 - **Printing quotes the YAML 1.1 boolean aliases** (`yes`/`no`/`on`/`off`/`y`/`n`) so a round trip
   is stable.
