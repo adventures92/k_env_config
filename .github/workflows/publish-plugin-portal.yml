@@ -18,6 +18,11 @@ on:
         description: "Version to publish, without the leading v (e.g. 0.2.0). Must already be on Maven Central."
         required: true
         type: string
+      ref:
+        description: "Ref to build from. Leave blank to use the v<version> tag."
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
@@ -28,9 +33,17 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          # Build from the released tag, not from main: the Portal must receive the artifact that
-          # was actually released, and main may have moved on.
-          ref: v${{ inputs.version }}
+          # Defaults to the released tag: the Portal should receive the artifact that was actually
+          # released, and main may have moved on.
+          #
+          # Overridable because a tag can predate this workflow. v0.2.0 does — it was cut before
+          # com.gradle.plugin-publish was added, so `publishPlugins` does not exist on it and a
+          # dispatch pinned to that tag can only fail. For that one listing, pass `ref: main`: the
+          # plugin *source* is byte-identical between v0.2.0 and main (only build config, docs and
+          # workflows differ), so the artifact is functionally the same one.
+          #
+          # For any release cut with this workflow already in place, leave it blank.
+          ref: ${{ inputs.ref != '' && inputs.ref || format('v{0}', inputs.version) }}
 
       - uses: actions/setup-java@v6
         with:
