@@ -85,16 +85,14 @@ fun App() {
                 AppHeader()
             }, scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior())
         }) {
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it)
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-
                 Spacer(modifier = Modifier.height(24.dp))
 
                 EnvironmentSwitcher(
@@ -102,7 +100,7 @@ fun App() {
                     onEnvironmentSelected = { env ->
                         EnvConfig.setActiveEnvironment(env)
                         currentEnv = env
-                    }
+                    },
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -122,7 +120,7 @@ fun App() {
                 Text(
                     text = "Contact: ${EnvConfig.Identity.SUPPORT_EMAIL}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -140,12 +138,12 @@ private fun AppHeader() {
         Text(
             text = EnvConfig.Identity.APP_NAME,
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
         Text(
             text = "v${EnvConfig.APP_VERSION}",
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -159,7 +157,7 @@ private fun AppHeader() {
 @Composable
 private fun EnvironmentSwitcher(
     currentEnv: String,
-    onEnvironmentSelected: (String) -> Unit
+    onEnvironmentSelected: (String) -> Unit,
 ) {
     val environments = listOf("dev", "production")
     var expanded by remember { mutableStateOf(false) }
@@ -167,9 +165,9 @@ private fun EnvironmentSwitcher(
     SectionCard(title = "Runtime Environment Selection") {
         Text(
             text = "Select the active environment at runtime. In KMP projects without " +
-                    "Android build variants, this is how you choose which config values to use.",
+                "Android build variants, this is how you choose which config values to use.",
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -180,20 +178,20 @@ private fun EnvironmentSwitcher(
             }
             DropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
             ) {
                 environments.forEach { env ->
                     DropdownMenuItem(
                         text = {
                             Text(
                                 text = env,
-                                fontWeight = if (env == currentEnv) FontWeight.Bold else FontWeight.Normal
+                                fontWeight = if (env == currentEnv) FontWeight.Bold else FontWeight.Normal,
                             )
                         },
                         onClick = {
                             onEnvironmentSelected(env)
                             expanded = false
-                        }
+                        },
                     )
                 }
             }
@@ -205,7 +203,7 @@ private fun EnvironmentSwitcher(
             text = "EnvConfig.setActiveEnvironment(\"$currentEnv\")",
             style = MaterialTheme.typography.bodySmall,
             fontFamily = FontFamily.Monospace,
-            color = MaterialTheme.colorScheme.tertiary
+            color = MaterialTheme.colorScheme.tertiary,
         )
     }
 }
@@ -313,15 +311,15 @@ private fun SectionCard(title: String, content: @Composable () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        ),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             )
             Spacer(modifier = Modifier.height(8.dp))
             content()
@@ -339,21 +337,21 @@ private fun ConfigRow(key: String, value: String, type: String) {
             .fillMaxWidth()
             .padding(vertical = 3.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = key,
                 style = MaterialTheme.typography.bodySmall,
                 fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
             )
         }
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = value,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
         )
         Spacer(modifier = Modifier.width(6.dp))
         TypeBadge(type)
@@ -373,9 +371,9 @@ private fun TypeBadge(type: String) {
         modifier = Modifier
             .background(
                 MaterialTheme.colorScheme.surfaceVariant,
-                RoundedCornerShape(4.dp)
+                RoundedCornerShape(4.dp),
             )
-            .padding(horizontal = 4.dp, vertical = 1.dp)
+            .padding(horizontal = 4.dp, vertical = 1.dp),
     )
 }
 
@@ -388,7 +386,7 @@ private fun GroupLabel(name: String) {
         text = name,
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(vertical = 4.dp)
+        modifier = Modifier.padding(vertical = 4.dp),
     )
 }
 
@@ -400,22 +398,22 @@ private fun FeatureItem(feature: String, detail: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 2.dp)
+            .padding(vertical = 2.dp),
     ) {
         Text(
             text = "•",
             style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(end = 6.dp)
+            modifier = Modifier.padding(end = 6.dp),
         )
         Text(
             text = "$feature — ",
             style = MaterialTheme.typography.bodySmall,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
         )
         Text(
             text = detail,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

@@ -12,5 +12,5 @@ data class EnvironmentConfig(
     val name: String,
     val values: Map<String, String>,
     val format: EnvFileFormat,
-    val sourceFile: String
+    val sourceFile: String,
 )

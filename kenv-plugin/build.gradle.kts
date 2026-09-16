@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.kotlinJvm)
     `java-gradle-plugin`
     alias(libs.plugins.mavenPublish)
+    alias(libs.plugins.spotless)
+    alias(libs.plugins.detekt)
 }
 
 group = "io.github.adventures92"
@@ -84,6 +86,53 @@ mavenPublishing {
             developerConnection.set("scm:git:ssh://git@github.com/adventures92/k_env_config.git")
         }
     }
+}
+
+// This is a separate Gradle build, so it applies its own formatter and static analysis; the root
+// build's spotless excludes `kenv-plugin/**` for exactly that reason. Both plugins resolve from
+// this build's own `pluginManagement` repositories (gradlePluginPortal) and both versions come from
+// the shared catalog wired in settings.gradle.kts — never inline.
+//
+// There is deliberately NO `.editorconfig` anywhere in this repository. ktlint reads one when it is
+// present, and any Kotlin style key in it silently overrides what is configured here, reformatting
+// the whole tree. Formatter configuration belongs in the build script.
+spotless {
+    kotlin {
+        target("src/**/*.kt")
+        targetExclude("**/build/**")
+        ktlint(libs.versions.ktlint.get()).editorConfigOverride(
+            mapOf(
+                "android" to "true",
+                // Kotest's generator DSL is a flat package of several dozen `Arb.xxx()` extension
+                // functions and is designed to be imported on demand; naming them individually
+                // would add ~15 import lines per property test and nothing else. This is the only
+                // package allowed a wildcard — note that setting this key REPLACES ktlint's
+                // default list, so no other on-demand import is permitted, including this
+                // project's own packages.
+                "ij_kotlin_packages_to_use_import_on_demand" to "io.kotest.property.arbitrary.**",
+            ),
+        )
+    }
+    kotlinGradle {
+        target("*.gradle.kts")
+        ktlint(libs.versions.ktlint.get())
+    }
+}
+
+// The config file lives at the repository root so both builds read one copy. `rootProject` here is
+// the *kenv-plugin* build, whose directory is `kenv-plugin/` — hence the `..`.
+//
+// `detekt-baseline.xml` records the 17 findings that already existed when static analysis was first
+// introduced (mostly `LongMethod` in the parsers and the code generator). It is accepted debt, not
+// a licence: the rules are live, so anything new fails the build, and every entry is one line of
+// XML naming the exact function — delete the line once the function is split. Raising a threshold
+// in detekt.yml instead would have hidden the same debt everywhere, permanently and invisibly.
+detekt {
+    config.setFrom(rootProject.file("../detekt.yml"))
+    baseline = file("detekt-baseline.xml")
+    buildUponDefaultConfig = true
+    allRules = false
+    source.setFrom("src/main/kotlin")
 }
 
 tasks.withType<Test> {

@@ -19,26 +19,27 @@ import io.kotest.property.checkAll
  * **Validates: Requirements 1.8**
  */
 @OptIn(ExperimentalKotest::class)
-class DefaultScopePropertyTest : FunSpec({
+class DefaultScopePropertyTest :
+    FunSpec({
 
-    val parser = YamlSchemaParser()
+        val parser = YamlSchemaParser()
 
-    test("Property 15: Default scope is environment - variables without scope field default to ENVIRONMENT") {
-        checkAll(PropTestConfig(iterations = 100), SchemaGenerators.arbSchemaYamlWithoutScope()) { yamlContent ->
-            // Parse the YAML schema that has no scope fields
-            val result = parser.parse(yamlContent, "test-schema.yaml")
+        test("Property 15: Default scope is environment - variables without scope field default to ENVIRONMENT") {
+            checkAll(PropTestConfig(iterations = 100), SchemaGenerators.arbSchemaYamlWithoutScope()) { yamlContent ->
+                // Parse the YAML schema that has no scope fields
+                val result = parser.parse(yamlContent, "test-schema.yaml")
 
-            // Assert successful parse
-            result.shouldBeInstanceOf<ParseResult.Success<Schema>>()
-            val schema = result.value
+                // Assert successful parse
+                result.shouldBeInstanceOf<ParseResult.Success<Schema>>()
+                val schema = result.value
 
-            // There should be at least one variable
-            schema.variables.shouldNotBeEmpty()
+                // There should be at least one variable
+                schema.variables.shouldNotBeEmpty()
 
-            // All variables should have scope = ENVIRONMENT since scope was omitted
-            for (variable in schema.variables) {
-                variable.scope shouldBe VariableScope.ENVIRONMENT
+                // All variables should have scope = ENVIRONMENT since scope was omitted
+                for (variable in schema.variables) {
+                    variable.scope shouldBe VariableScope.ENVIRONMENT
+                }
             }
         }
-    }
-})
+    })

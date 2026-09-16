@@ -1,6 +1,10 @@
 package adven.kenv.config.generators
 
-import adven.kenv.config.schema.*
+import adven.kenv.config.schema.Schema
+import adven.kenv.config.schema.SchemaGroup
+import adven.kenv.config.schema.SchemaType
+import adven.kenv.config.schema.SchemaVariable
+import adven.kenv.config.schema.VariableScope
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.*
 import io.kotest.property.arbitrary.map
@@ -15,8 +19,14 @@ object SchemaGenerators {
      * interpret them as boolean values (e.g., ON -> true, OFF -> false).
      */
     private val YAML_RESERVED_WORDS = setOf(
-        "ON", "OFF", "YES", "NO", "TRUE", "FALSE",
-        "Y", "N"
+        "ON",
+        "OFF",
+        "YES",
+        "NO",
+        "TRUE",
+        "FALSE",
+        "Y",
+        "N",
     )
 
     /**
@@ -103,7 +113,7 @@ object SchemaGenerators {
             name = varName,
             type = type,
             scope = scope,
-            description = description
+            description = description,
         )
     }
 
@@ -181,7 +191,7 @@ object SchemaGenerators {
         Schema(
             environments = environments,
             variables = variables,
-            groups = groups
+            groups = groups,
         )
     }
 
@@ -296,25 +306,23 @@ object SchemaGenerators {
      * Generates a default value string suitable for YAML embedding, based on the given type.
      * Used internally by arbSchemaYamlWithDefault().
      */
-    private fun arbDefaultValueForYaml(type: SchemaType, rs: io.kotest.property.RandomSource): String {
-        return when (type) {
-            SchemaType.STRING -> {
-                val length = rs.random.nextInt(3, 15)
-                val chars = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-                (1..length).map { chars.random(rs.random) }.joinToString("")
-            }
-            SchemaType.INT -> rs.random.nextInt(-999, 999).toString()
-            SchemaType.LONG -> rs.random.nextLong(-9999, 9999).toString()
-            SchemaType.DOUBLE -> String.format("%.2f", rs.random.nextDouble(-99.0, 99.0))
-            SchemaType.FLOAT -> String.format("%.2f", rs.random.nextFloat() * 198.0f - 99.0f)
-            SchemaType.BOOLEAN -> if (rs.random.nextBoolean()) "true" else "false"
-            SchemaType.URL -> listOf(
-                "http://localhost",
-                "https://example.com",
-                "http://api.test.io/v1",
-                "https://myapp.dev:8080"
-            ).random(rs.random)
+    private fun arbDefaultValueForYaml(type: SchemaType, rs: io.kotest.property.RandomSource): String = when (type) {
+        SchemaType.STRING -> {
+            val length = rs.random.nextInt(3, 15)
+            val chars = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+            (1..length).map { chars.random(rs.random) }.joinToString("")
         }
+        SchemaType.INT -> rs.random.nextInt(-999, 999).toString()
+        SchemaType.LONG -> rs.random.nextLong(-9999, 9999).toString()
+        SchemaType.DOUBLE -> String.format("%.2f", rs.random.nextDouble(-99.0, 99.0))
+        SchemaType.FLOAT -> String.format("%.2f", rs.random.nextFloat() * 198.0f - 99.0f)
+        SchemaType.BOOLEAN -> if (rs.random.nextBoolean()) "true" else "false"
+        SchemaType.URL -> listOf(
+            "http://localhost",
+            "https://example.com",
+            "http://api.test.io/v1",
+            "https://myapp.dev:8080",
+        ).random(rs.random)
     }
 
     /**

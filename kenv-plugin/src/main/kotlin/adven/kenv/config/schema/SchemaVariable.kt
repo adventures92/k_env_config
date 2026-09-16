@@ -12,5 +12,5 @@ data class SchemaVariable(
     val name: String,
     val type: SchemaType,
     val scope: VariableScope,
-    val description: String?
+    val description: String?,
 )

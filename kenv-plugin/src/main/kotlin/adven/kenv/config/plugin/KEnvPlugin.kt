@@ -48,12 +48,12 @@ class KEnvPlugin : Plugin<Project> {
 
             // Support activeEnvironment override via Gradle property (-PactiveEnvironment=...)
             task.activeEnvironment.set(
-                project.providers.gradleProperty("activeEnvironment")
+                project.providers.gradleProperty("activeEnvironment"),
             )
 
             // Set default output directory
             task.outputDirectory.set(
-                project.layout.buildDirectory.dir("generated/kenv/commonMain/kotlin")
+                project.layout.buildDirectory.dir("generated/kenv/commonMain/kotlin"),
             )
 
             task.group = "kenv"
@@ -101,7 +101,7 @@ class KEnvPlugin : Plugin<Project> {
             if (env !in environments) {
                 throw GradleException(
                     "Variant mapping error: build type '$buildType' maps to " +
-                        "environment '$env' which is not in declared environments: $environments"
+                        "environment '$env' which is not in declared environments: $environments",
                 )
             }
         }
@@ -110,7 +110,7 @@ class KEnvPlugin : Plugin<Project> {
             if (env !in environments) {
                 throw GradleException(
                     "Variant mapping error: flavor '$flavor' maps to " +
-                        "environment '$env' which is not in declared environments: $environments"
+                        "environment '$env' which is not in declared environments: $environments",
                 )
             }
         }
@@ -119,10 +119,8 @@ class KEnvPlugin : Plugin<Project> {
     /**
      * Checks whether the project has an Android application or library plugin applied.
      */
-    private fun isAndroidProject(project: Project): Boolean {
-        return project.plugins.hasPlugin("com.android.application") ||
-            project.plugins.hasPlugin("com.android.library")
-    }
+    private fun isAndroidProject(project: Project): Boolean = project.plugins.hasPlugin("com.android.application") ||
+        project.plugins.hasPlugin("com.android.library")
 
     /**
      * Registers per-variant generate tasks when variant mapping is configured and
@@ -133,7 +131,7 @@ class KEnvPlugin : Plugin<Project> {
     private fun wireVariantMapping(
         project: Project,
         extension: KEnvExtension,
-        variantMapping: VariantMappingDsl
+        variantMapping: VariantMappingDsl,
     ) {
         // Register per-build-type tasks
         for ((buildType, env) in variantMapping.buildTypeMappings) {
@@ -185,7 +183,7 @@ class KEnvPlugin : Plugin<Project> {
     private fun wireAndroidVariantSourceSet(
         project: Project,
         variantName: String,
-        variantTask: org.gradle.api.tasks.TaskProvider<KEnvGenerateTask>
+        variantTask: org.gradle.api.tasks.TaskProvider<KEnvGenerateTask>,
     ) {
         // Wire the generated output directory into the variant's kotlin source set
         val androidExtension = project.extensions.findByName("android") ?: return
@@ -217,7 +215,7 @@ class KEnvPlugin : Plugin<Project> {
      */
     private fun wireSourceSets(
         project: Project,
-        generateTask: org.gradle.api.tasks.TaskProvider<KEnvGenerateTask>
+        generateTask: org.gradle.api.tasks.TaskProvider<KEnvGenerateTask>,
     ) {
         // Try KMP source sets first (commonMain)
         val kotlinExtension = project.extensions.findByName("kotlin")
@@ -258,7 +256,7 @@ class KEnvPlugin : Plugin<Project> {
      */
     private fun wireTaskDependencies(
         project: Project,
-        generateTask: org.gradle.api.tasks.TaskProvider<KEnvGenerateTask>
+        generateTask: org.gradle.api.tasks.TaskProvider<KEnvGenerateTask>,
     ) {
         // Try to wire before compileKotlinMetadata (KMP projects)
         project.tasks.matching { it.name == "compileKotlinMetadata" }.configureEach {

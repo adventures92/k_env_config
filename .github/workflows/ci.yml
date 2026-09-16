@@ -42,6 +42,19 @@ jobs:
       # decision, not a version bump. v5 already runs on Node 24, so it carries no deprecation debt.
       - uses: gradle/actions/setup-gradle@v5
 
+      # Formatting and static analysis, before the tests — a failure here is cheap to read and
+      # cheap to fix, and there is no point spending a test run to find out the build is unformatted.
+      #
+      # Both tasks are addressed into the `kenv-plugin` included build, which applies spotless and
+      # detekt itself. That keeps this job pure JVM: it never configures `:composeApp` and so never
+      # needs the Android SDK. The root build's own spotlessCheck runs in the `demo` job below,
+      # where AGP is configured anyway.
+      #
+      # detekt runs with `maxIssues: 0`, against `detekt-baseline.xml` — the findings that predate
+      # static analysis are listed there one by one, so new ones still fail.
+      - name: Static analysis
+        run: ./gradlew kenv-plugin:spotlessCheck kenv-plugin:detekt
+
       - name: Test the plugin
         run: ./gradlew kenv-plugin:test
 
@@ -76,6 +89,13 @@ jobs:
           java-version: 21
 
       - uses: gradle/actions/setup-gradle@v5
+
+      # The root build's formatter, covering the demo app and the root build scripts.
+      # `kenv-plugin/**` is excluded there and checked by the `plugin` job instead. This runs here
+      # rather than in that job because the root build configures `:composeApp`, and that needs the
+      # Android SDK — which this job already has.
+      - name: Check formatting
+        run: ./gradlew spotlessCheck
 
       # Runs the plugin against the demo's real schema and env files, then asserts it emitted
       # something. `assembleDebug` alone would not catch generation producing an empty file.

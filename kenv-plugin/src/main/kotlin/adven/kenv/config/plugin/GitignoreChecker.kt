@@ -10,9 +10,9 @@ class GitignoreChecker(private val logger: Logger) {
         if (!gitignore.exists()) {
             logger.warn(
                 "KEnv: No .gitignore found in ${kenvDirectory.path}. " +
-                "Consider adding one with patterns like:\n" +
-                "  env.production.*\n" +
-                "  env.global.*"
+                    "Consider adding one with patterns like:\n" +
+                    "  env.production.*\n" +
+                    "  env.global.*",
             )
         }
     }

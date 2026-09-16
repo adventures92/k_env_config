@@ -10,5 +10,5 @@ package adven.kenv.config.schema
 data class Schema(
     val environments: List<String>,
     val variables: List<SchemaVariable>,
-    val groups: List<SchemaGroup>
+    val groups: List<SchemaGroup>,
 )

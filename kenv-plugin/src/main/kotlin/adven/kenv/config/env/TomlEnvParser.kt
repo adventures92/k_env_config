@@ -1,9 +1,8 @@
 package adven.kenv.config.env
 
-import com.moandjiezana.toml.Toml
-import com.moandjiezana.toml.TomlWriter
 import adven.kenv.config.model.ParseError
 import adven.kenv.config.model.ParseResult
+import com.moandjiezana.toml.Toml
 
 /**
  * Parser for TOML format environment files.
@@ -20,8 +19,8 @@ class TomlEnvParser : EnvFileParser {
                     name = environmentName,
                     values = emptyMap(),
                     format = EnvFileFormat.TOML,
-                    sourceFile = filePath
-                )
+                    sourceFile = filePath,
+                ),
             )
         }
 
@@ -35,9 +34,9 @@ class TomlEnvParser : EnvFileParser {
                         message = e.message ?: "Invalid TOML syntax",
                         filePath = filePath,
                         line = line,
-                        column = null
-                    )
-                )
+                        column = null,
+                    ),
+                ),
             )
         } catch (e: Exception) {
             return ParseResult.Failure(
@@ -46,9 +45,9 @@ class TomlEnvParser : EnvFileParser {
                         message = e.message ?: "Invalid TOML syntax",
                         filePath = filePath,
                         line = 1,
-                        column = null
-                    )
-                )
+                        column = null,
+                    ),
+                ),
             )
         }
 
@@ -66,8 +65,8 @@ class TomlEnvParser : EnvFileParser {
                             message = "Nested tables are not supported in environment files. Key '$key' must have a scalar value.",
                             filePath = filePath,
                             line = lineNumber,
-                            column = null
-                        )
+                            column = null,
+                        ),
                     )
                 }
                 is List<*> -> {
@@ -76,8 +75,8 @@ class TomlEnvParser : EnvFileParser {
                             message = "Arrays are not supported in environment files. Key '$key' must have a scalar value.",
                             filePath = filePath,
                             line = lineNumber,
-                            column = null
-                        )
+                            column = null,
+                        ),
                     )
                 }
                 else -> {
@@ -94,8 +93,8 @@ class TomlEnvParser : EnvFileParser {
                     name = environmentName,
                     values = values,
                     format = EnvFileFormat.TOML,
-                    sourceFile = filePath
-                )
+                    sourceFile = filePath,
+                ),
             )
         }
     }
@@ -137,12 +136,10 @@ class TomlEnvParser : EnvFileParser {
     /**
      * Escapes special characters in a TOML string value.
      */
-    private fun escapeTomlString(value: String): String {
-        return value
-            .replace("\\", "\\\\")
-            .replace("\"", "\\\"")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
-            .replace("\t", "\\t")
-    }
+    private fun escapeTomlString(value: String): String = value
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
+        .replace("\n", "\\n")
+        .replace("\r", "\\r")
+        .replace("\t", "\\t")
 }

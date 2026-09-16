@@ -42,6 +42,18 @@ inside the plugin build. Anything else that "should just be inherited" must be t
 ## Commands
 
 ```bash
+# Quality gates — run before considering any kenv-plugin change done
+./gradlew kenv-plugin:spotlessCheck kenv-plugin:detekt
+
+# The same for the root build (demo app and root build scripts)
+./gradlew spotlessCheck
+
+# Auto-fix formatting. Two builds, so two tasks
+./gradlew spotlessApply kenv-plugin:spotlessApply
+
+# Re-record the detekt baseline — only after deliberately accepting a finding
+./gradlew kenv-plugin:detektBaseline
+
 # The plugin's own suite
 ./gradlew kenv-plugin:test
 
@@ -62,6 +74,32 @@ Requires JDK 17+ (the plugin targets a 17 toolchain) and the Android SDK for the
 > **A test run that discovers nothing still exits 0.** Kotest 6 changed discovery. `BUILD
 > SUCCESSFUL` is not proof a suite ran — check the `tests="N"` totals in
 > `kenv-plugin/build/test-results/test/*.xml`. CI asserts this explicitly.
+
+### Static analysis
+
+spotless (ktlint) formats; detekt analyses. Because the repository is two Gradle builds, **each
+build applies spotless itself** — the root build's `spotless` block excludes `kenv-plugin/**`, and
+`kenv-plugin/build.gradle.kts` covers its own sources. There is no single `spotlessCheck` that
+covers everything; run both, as CI does. detekt runs on `kenv-plugin/src/main/kotlin` only, which
+is where the product lives.
+
+> **Do not add an `.editorconfig`.** ktlint reads one when it is present, and any Kotlin style key
+> in it silently overrides the configuration spotless applies in `build.gradle.kts` — reformatting
+> the entire codebase on the next `spotlessApply`. Formatter configuration belongs in the build
+> scripts. This is a known trap; the sibling Sockit repository lost ~30 files to it.
+
+`detekt.yml` at the repository root is the single config, shared by both builds, and runs with
+`maxIssues: 0` — any finding fails the build. `kenv-plugin/detekt-baseline.xml` holds the **17
+findings that already existed** when analysis was introduced: 8 `LongMethod`, 2 `NestedBlockDepth`,
+2 `ReturnCount`, 2 `UnusedParameter`, and one each of `CyclomaticComplexMethod`, `ThrowsCount` and
+`UnusedPrivateProperty`, concentrated in the parsers, `DefaultCodeGenerator` and `DefaultValidator`.
+They are accepted debt, not permission: the rules are live, so anything new fails. Each entry names
+one function — split the function, delete the line. Prefer that to `detektBaseline`, which
+re-records whatever is there and is how a baseline quietly becomes a dumping ground.
+
+Two narrow, deliberate exemptions exist, both documented where they are declared:
+`io.kotest.property.arbitrary.**` may be imported on demand in tests (the generator DSL is designed
+that way), and `composeApp`'s `MainViewController` keeps its PascalCase name because Swift calls it.
 
 ## Architecture
 

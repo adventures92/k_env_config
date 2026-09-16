@@ -5,7 +5,14 @@ package adven.kenv.config.schema
  * Each type maps to a corresponding Kotlin standard library type.
  */
 enum class SchemaType {
-    STRING, INT, LONG, DOUBLE, FLOAT, BOOLEAN, URL;
+    STRING,
+    INT,
+    LONG,
+    DOUBLE,
+    FLOAT,
+    BOOLEAN,
+    URL,
+    ;
 
     /**
      * Returns the Kotlin type name corresponding to this schema type.

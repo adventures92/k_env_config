@@ -9,7 +9,7 @@ package adven.kenv.config.validation
  */
 data class ValidationResult(
     val errors: List<ValidationError>,
-    val warnings: List<ValidationWarning>
+    val warnings: List<ValidationWarning>,
 ) {
     /** Whether the validation passed with no errors. */
     val isValid: Boolean get() = errors.isEmpty()

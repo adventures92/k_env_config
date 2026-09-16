@@ -22,6 +22,6 @@ interface Validator {
         schema: Schema,
         configs: Map<String, EnvironmentConfig>,
         globalConfig: GlobalConfig?,
-        activeEnvironment: String? = null
+        activeEnvironment: String? = null,
     ): ValidationResult
 }

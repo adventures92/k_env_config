@@ -19,7 +19,7 @@ import adven.kenv.config.schema.VariableScope
  * @param packageName Required package declaration for the generated file
  */
 class DefaultCodeGenerator(
-    private val packageName: String
+    private val packageName: String,
 ) : CodeGenerator {
 
     override fun generate(
@@ -27,7 +27,7 @@ class DefaultCodeGenerator(
         configs: Map<String, EnvironmentConfig>,
         globalConfig: GlobalConfig?,
         activeEnvironment: String?,
-        className: String
+        className: String,
     ): String {
         val builder = StringBuilder()
 
@@ -52,7 +52,7 @@ class DefaultCodeGenerator(
         configs: Map<String, EnvironmentConfig>,
         globalConfig: GlobalConfig?,
         activeEnvironment: String,
-        className: String
+        className: String,
     ) {
         val envConfig = configs[activeEnvironment]
         val envValues = envConfig?.values ?: emptyMap()
@@ -97,7 +97,7 @@ class DefaultCodeGenerator(
         schema: Schema,
         configs: Map<String, EnvironmentConfig>,
         globalConfig: GlobalConfig?,
-        className: String
+        className: String,
     ) {
         builder.appendLine("object $className {")
         builder.appendLine()
@@ -208,7 +208,7 @@ class DefaultCodeGenerator(
         globalConfig: GlobalConfig?,
         environments: List<String>,
         className: String,
-        indent: Int
+        indent: Int,
     ) {
         val indentStr = "    ".repeat(indent)
         val innerIndent = "    ".repeat(indent + 1)
@@ -228,23 +228,23 @@ class DefaultCodeGenerator(
                 VariableScope.ENVIRONMENT -> {
                     emitKDoc(builder, variable.description, innerIndent)
                     builder.appendLine("${innerIndent}val ${variable.name}: ${variable.type.toKotlinType()}")
-                    builder.appendLine("${innerIndent}    get() = when (_activeEnvironment) {")
+                    builder.appendLine("$innerIndent    get() = when (_activeEnvironment) {")
                     for (envName in environments) {
                         val envConfig = configs[envName]
                         val value = envConfig?.values?.get(variable.name)
                         if (value != null) {
-                            builder.appendLine("${innerIndent}        \"$envName\" -> ${formatValue(value, variable.type)}")
+                            builder.appendLine("$innerIndent        \"$envName\" -> ${formatValue(value, variable.type)}")
                         }
                     }
-                    builder.appendLine("${innerIndent}        else -> throw IllegalStateException(")
-                    builder.appendLine("${innerIndent}            \"Active environment not set. Call $className.setActiveEnvironment() first.\"")
-                    builder.appendLine("${innerIndent}        )")
-                    builder.appendLine("${innerIndent}    }")
+                    builder.appendLine("$innerIndent        else -> throw IllegalStateException(")
+                    builder.appendLine("$innerIndent            \"Active environment not set. Call $className.setActiveEnvironment() first.\"")
+                    builder.appendLine("$innerIndent        )")
+                    builder.appendLine("$innerIndent    }")
                 }
             }
         }
 
-        builder.appendLine("${indentStr}}")
+        builder.appendLine("$indentStr}")
     }
 
     /**
@@ -255,7 +255,7 @@ class DefaultCodeGenerator(
         group: SchemaGroup,
         envValues: Map<String, String>,
         globalConfig: GlobalConfig?,
-        indent: Int
+        indent: Int,
     ) {
         val indentStr = "    ".repeat(indent)
         val innerIndent = "    ".repeat(indent + 1)
@@ -274,7 +274,7 @@ class DefaultCodeGenerator(
             }
         }
 
-        builder.appendLine("${indentStr}}")
+        builder.appendLine("$indentStr}")
     }
 
     /**
@@ -290,67 +290,55 @@ class DefaultCodeGenerator(
     /**
      * Escapes special KDoc characters in description text.
      */
-    private fun escapeKDoc(text: String): String {
-        return text
-            .replace("*/", "&#42;/")
-            .replace("@", "&#64;")
-    }
+    private fun escapeKDoc(text: String): String = text
+        .replace("*/", "&#42;/")
+        .replace("@", "&#64;")
 
     /**
      * Resolves the value for a global-scoped variable.
      */
-    private fun resolveGlobalValue(variable: SchemaVariable, globalConfig: GlobalConfig?): String? {
-        return globalConfig?.values?.get(variable.name)
-    }
+    private fun resolveGlobalValue(variable: SchemaVariable, globalConfig: GlobalConfig?): String? = globalConfig?.values?.get(variable.name)
 
     /**
      * Resolves the value for an environment-scoped variable.
      */
-    private fun resolveEnvironmentValue(variable: SchemaVariable, envValues: Map<String, String>): String? {
-        return envValues[variable.name]
-    }
+    private fun resolveEnvironmentValue(variable: SchemaVariable, envValues: Map<String, String>): String? = envValues[variable.name]
 
     /**
      * Formats a raw string value as a Kotlin literal based on the schema type.
      */
-    private fun formatValue(value: String, type: SchemaType): String {
-        return when (type) {
-            SchemaType.STRING, SchemaType.URL -> "\"${escapeString(value)}\""
-            SchemaType.INT -> value.toIntOrNull()?.toString() ?: value
-            SchemaType.LONG -> "${value.toLongOrNull() ?: value}L"
-            SchemaType.DOUBLE -> {
-                val d = value.toDoubleOrNull()
-                if (d != null) {
-                    // Ensure there's a decimal point
-                    val str = d.toString()
-                    if ('.' in str) str else "$str.0"
-                } else {
-                    value
-                }
+    private fun formatValue(value: String, type: SchemaType): String = when (type) {
+        SchemaType.STRING, SchemaType.URL -> "\"${escapeString(value)}\""
+        SchemaType.INT -> value.toIntOrNull()?.toString() ?: value
+        SchemaType.LONG -> "${value.toLongOrNull() ?: value}L"
+        SchemaType.DOUBLE -> {
+            val d = value.toDoubleOrNull()
+            if (d != null) {
+                // Ensure there's a decimal point
+                val str = d.toString()
+                if ('.' in str) str else "$str.0"
+            } else {
+                value
             }
-            SchemaType.FLOAT -> "${value.toFloatOrNull() ?: value}f"
-            SchemaType.BOOLEAN -> value.lowercase()
         }
+        SchemaType.FLOAT -> "${value.toFloatOrNull() ?: value}f"
+        SchemaType.BOOLEAN -> value.lowercase()
     }
 
     /**
      * Escapes special characters in a string for use in a Kotlin string literal.
      */
-    private fun escapeString(value: String): String {
-        return value
-            .replace("\\", "\\\\")
-            .replace("\"", "\\\"")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
-            .replace("\t", "\\t")
-            .replace("$", "\\$")
-    }
+    private fun escapeString(value: String): String = value
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
+        .replace("\n", "\\n")
+        .replace("\r", "\\r")
+        .replace("\t", "\\t")
+        .replace("$", "\\$")
 
     /**
      * Capitalizes an environment name for use as a Kotlin object name.
      * e.g., "dev" → "Dev", "production" → "Production"
      */
-    private fun capitalizeEnvironmentName(name: String): String {
-        return name.replaceFirstChar { it.uppercase() }
-    }
+    private fun capitalizeEnvironmentName(name: String): String = name.replaceFirstChar { it.uppercase() }
 }
