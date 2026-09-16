@@ -65,6 +65,9 @@ inside the plugin build. Anything else that "should just be inherited" must be t
 cd kenv-plugin && ../gradlew publishToMavenLocal --no-configuration-cache
 find ~/.m2/repository/io/github/adventures92/kenv-config -type f | sort
 
+# API documentation — the javadoc jar published to Central
+./gradlew kenv-plugin:dokkaGeneratePublicationHtml   # -> kenv-plugin/build/dokka/html/
+
 # The guide
 mdbook build     # -> book/, gitignored
 ```
@@ -74,6 +77,11 @@ Requires JDK 17+ (the plugin targets a 17 toolchain) and the Android SDK for the
 > **A test run that discovers nothing still exits 0.** Kotest 6 changed discovery. `BUILD
 > SUCCESSFUL` is not proof a suite ran — check the `tests="N"` totals in
 > `kenv-plugin/build/test-results/test/*.xml`. CI asserts this explicitly.
+
+> **`dokkaHtml` is the Dokka V1 helper.** Under Dokka V2 it still exists, runs, produces nothing
+> and reports success — so wiring it into the javadoc jar yields an empty jar with no error
+> anywhere. Always use `dokkaGeneratePublicationHtml`. Sockit shipped empty javadoc jars from
+> exactly this, and 0.2.0 here shipped one because no Dokka was configured at all.
 
 ### Static analysis
 
