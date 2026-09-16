@@ -13,6 +13,14 @@ coordinates. Build, CI and refactoring changes do not; git history holds those.
 
 ### Fixed
 
+- Schema files are no longer rewritten by YAML 1.1 implicit typing. The schema parser kept
+  SnakeYAML's defaults, so a variable named `ON` or `NO` silently became `true`/`false` — KEnv
+  variables are conventionally SCREAMING_SNAKE_CASE, and YAML 1.1 resolves those tokens as
+  booleans in any casing. The same applied to environment names (`no` became `"false"`), group
+  names, and unquoted descriptions (`1.10` became `"1.1"`). This is the bug previously fixed for
+  *env* files, which had survived in the schema parser because the hardening lived privately
+  inside the env parser; both now share one loader.
+
 - YAML env files no longer have their values silently retyped. SnakeYAML's YAML 1.1 implicit
   resolver was coercing unquoted scalars before they were converted back to `String`, so a file
   did not mean what it showed: `FEATURE: on` became `"true"`, `REGION: no` became `"false"`,
