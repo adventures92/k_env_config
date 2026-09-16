@@ -165,6 +165,7 @@ which refuses to apply a ruleset whose required checks name jobs that do not exi
 | `release.yml` | tag `v*`; `workflow_call`; manual with `dry_run` | The only path to a published release |
 | `tag-and-release.yml` | push to `main` touching `kenv-plugin/gradle.properties` | Detects a `VERSION_NAME` change, tags, calls `release.yml` |
 | `docs.yml` | docs push to `main`; `workflow_call`; manual | mdBook guide to GitHub Pages |
+| `publish-plugin-portal.yml` | manual | Lists an already-released version on the Gradle Plugin Portal |
 
 > **A tag pushed with `GITHUB_TOKEN` does not trigger workflows.** GitHub suppresses triggers for
 > events raised by that token, to prevent recursion. `release.yml` and `docs.yml` are therefore
@@ -213,6 +214,40 @@ were found the hard way during the 0.2.0 release.
 | `GPG_KEY_CONTENTS` | `signingInMemoryKey` |
 | `SIGNING_PASSWORD` | `signingInMemoryKeyPassword` |
 | `SIGNING_KEY_ID` | `signingInMemoryKeyId` (last 8 characters of the fingerprint) |
+
+### Gradle Plugin Portal
+
+The Portal is a **discoverability listing, not a delivery channel**. `plugins.gradle.org` proxies
+Maven Central, so
+
+```kotlin
+plugins { id("io.github.adventures92.kenv-config") version "0.2.0" }
+```
+
+already resolves with no extra repository configuration — verified from an empty `GRADLE_USER_HOME`,
+which reached the plugin's own `generatedPackageName is required` error. A Portal listing adds
+search on plugins.gradle.org; it is not a prerequisite for anyone to use the plugin.
+
+`publish-plugin-portal.yml` publishes a version that is **already on Central**, by manual dispatch.
+It is deliberately not part of `release.yml`: wiring an unproven publish into the release path would
+risk failing a release that had already published to Central, for a listing nobody is blocked on.
+Folding it in as a job that `needs: publish` is reasonable once it has succeeded a few times.
+
+It needs two secrets from <https://plugins.gradle.org> → profile → API keys:
+
+| Secret | |
+|--------|--|
+| `GRADLE_PUBLISH_KEY` | API key |
+| `GRADLE_PUBLISH_SECRET` | API secret |
+
+> **Only one javadoc jar may exist.** `com.gradle.plugin-publish` calls `java.withJavadocJar()`, so
+> a `javadocJar` task already exists. Asking vanniktech for a second one with
+> `JavadocJar.Dokka(...)` makes two tasks write the same `build/libs/*-javadoc.jar`; Gradle fails on
+> the undeclared dependency, and if it did not, whichever ran last would win — which is how an empty
+> javadoc jar returns intermittently. vanniktech is set to `JavadocJar.None()` and the existing task
+> is filled from Dokka. That wiring uses `tasks.matching { }.configureEach { }` because
+> plugin-publish registers `javadocJar` from an `afterEvaluate`, so `tasks.named` cannot find it from
+> anywhere in the build script.
 
 ## What gets published
 

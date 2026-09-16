@@ -256,5 +256,12 @@ Still manual — these need secret values or a UI toggle, and this script never 
      requests, which weakens branch protection, so it should be a decision rather than a side
      effect of running setup.
 
-  4. Enable Discussions — the issue-template chooser links to it.
+  4. Gradle Plugin Portal — https://plugins.gradle.org > profile > API keys
+       GRADLE_PUBLISH_KEY      API key
+       GRADLE_PUBLISH_SECRET   API secret
+
+     Only needed for publish-plugin-portal.yml, which lists the plugin for search. The Portal
+     proxies Maven Central, so the plugin already resolves without it.
+
+  5. Enable Discussions — the issue-template chooser links to it.
 NOTE

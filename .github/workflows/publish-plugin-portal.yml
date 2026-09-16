@@ -1,0 +1,68 @@
+name: publish-plugin-portal
+
+# Publishes an already-released version to the Gradle Plugin Portal.
+#
+# Deliberately NOT part of release.yml. The Portal is a discoverability listing, not a delivery
+# channel: plugins.gradle.org proxies Maven Central, so `plugins { id("io.github.adventures92.
+# kenv-config") version "x" }` already resolves without it — verified from an empty Gradle cache.
+# Wiring an unproven publish into the release path would risk failing a release that had already
+# published to Central, for a listing nobody is blocked on.
+#
+# Run it after a release has landed on Central. Once it has succeeded a few times, folding it into
+# release.yml as a job that needs `publish` is a reasonable next step.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish, without the leading v (e.g. 0.2.0). Must already be on Maven Central."
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  publish-portal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Build from the released tag, not from main: the Portal must receive the artifact that
+          # was actually released, and main may have moved on.
+          ref: v${{ inputs.version }}
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v5
+
+      # Publishing a version that is not on Central would list a plugin whose marker resolves to
+      # nothing. Cheap to check, and it cannot be undone afterwards.
+      - name: Require the version to be on Maven Central
+        run: |
+          V="${{ inputs.version }}"
+          URL="https://repo1.maven.org/maven2/io/github/adventures92/kenv-config/$V/kenv-config-$V.pom"
+          CODE="$(curl -s -o /dev/null -w '%{http_code}' "$URL")"
+          echo "$URL -> $CODE"
+          [ "$CODE" = "200" ] || { echo "::error::$V is not on Maven Central"; exit 1; }
+
+      - name: Publish to the Gradle Plugin Portal
+        working-directory: kenv-plugin
+        run: >
+          ../gradlew publishPlugins
+          -PVERSION_NAME=${{ inputs.version }}
+          --no-configuration-cache
+        env:
+          GRADLE_PUBLISH_KEY: ${{ secrets.GRADLE_PUBLISH_KEY }}
+          GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
+
+      # The Portal takes a few minutes to index. A 404 here is not necessarily a failure, so this
+      # reports rather than fails.
+      - name: Check the Portal page
+        run: |
+          CODE="$(curl -s -o /dev/null -w '%{http_code}' \
+            "https://plugins.gradle.org/plugin/io.github.adventures92.kenv-config/${{ inputs.version }}")"
+          echo "Portal page -> $CODE (404 is expected for a few minutes after publishing)"
