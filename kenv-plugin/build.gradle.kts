@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.spotless)
     alias(libs.plugins.detekt)
     alias(libs.plugins.dokka)
+    alias(libs.plugins.pluginPublish)
 }
 
 group = "io.github.adventures92"
@@ -37,26 +38,46 @@ dependencies {
     testImplementation(gradleTestKit())
 }
 
+// `website`, `vcsUrl` and per-plugin `tags` are required by com.gradle.plugin-publish — the Portal
+// rejects a publication without them. They live here rather than in a `pluginBundle {}` block,
+// which that plugin removed in 1.0.
 gradlePlugin {
+    website.set("https://adventures92.github.io/k_env_config/")
+    vcsUrl.set("https://github.com/adventures92/k_env_config")
+
     plugins {
         create("kenv") {
             id = "io.github.adventures92.kenv-config"
             implementationClass = "adven.kenv.config.plugin.KEnvPlugin"
             displayName = "KEnv Config Plugin"
             description = "Schema-based, type-safe environment variable management for Kotlin Multiplatform projects"
+            tags.set(
+                listOf(
+                    "configuration",
+                    "environment-variables",
+                    "dotenv",
+                    "code-generation",
+                    "kotlin-multiplatform",
+                    "android",
+                ),
+            )
         }
     }
 }
 
 mavenPublishing {
-    // Without this the published javadoc jar is an EMPTY stub: 0.2.0 shipped one containing
-    // nothing but a manifest, because Central requires the file to exist and never inspects it.
+    // There must be exactly ONE javadoc jar, and it must contain Dokka's HTML. 0.2.0 published a
+    // jar holding nothing but a manifest: Maven Central requires the file to exist and never
+    // inspects it, so an empty stub passes validation in silence.
     //
-    // The task name matters. `dokkaHtml` is the Dokka V1 helper — in V2 it still exists, runs,
-    // produces nothing and reports success, so wiring it here yields the same empty jar with no
-    // error anywhere. `dokkaGeneratePublicationHtml` is the V2 task that actually emits HTML.
-    // Sockit shipped empty javadoc jars from exactly that mistake.
-    configure(GradlePlugin(javadocJar = JavadocJar.Dokka("dokkaGeneratePublicationHtml")))
+    // `com.gradle.plugin-publish` already calls `java.withJavadocJar()`, so a `javadocJar` task
+    // exists and the java component publishes it. Asking vanniktech for a second one via
+    // `JavadocJar.Dokka(...)` added `dokkaJavadocJar` writing the same `build/libs/*-javadoc.jar`.
+    // Gradle rejected that as an undeclared dependency; had it not, whichever task ran last would
+    // win and the empty jar would come back intermittently.
+    //
+    // So vanniktech contributes none, and the existing `javadocJar` is filled from Dokka below.
+    configure(GradlePlugin(javadocJar = JavadocJar.None()))
 
     // Central Portal is the only host from 0.33 onwards — the SonatypeHost argument this used to
     // take was removed when the legacy OSSRH endpoints were retired. The release workflow runs
@@ -99,6 +120,23 @@ mavenPublishing {
             developerConnection.set("scm:git:ssh://git@github.com/adventures92/k_env_config.git")
         }
     }
+}
+
+// Fill the javadoc jar from Dokka rather than from the Java `javadoc` task, which produces nothing
+// for a Kotlin project.
+//
+// `matching { }.configureEach { }` rather than `tasks.named("javadocJar")`: plugin-publish registers
+// that task from an `afterEvaluate`, so an eager lookup fails from anywhere in this script — it is
+// not an ordering problem that moving the block solves. This form configures the task if and when
+// it is created, and quietly does nothing if it never is.
+//
+// The Dokka task name matters. `dokkaHtml` is the V1 helper — under V2 it still exists, runs,
+// produces nothing and reports success, so wiring it here would rebuild the empty jar with no error
+// anywhere. `dokkaGeneratePublicationHtml` is the V2 task that actually emits HTML. This build's own
+// task list shows `dokkaJavadoc - [⚠ V1 tasks disabled]`, which is the same trap one name over.
+tasks.matching { it.name == "javadocJar" }.configureEach {
+    this as Jar
+    from(tasks.named("dokkaGeneratePublicationHtml"))
 }
 
 // This is a separate Gradle build, so it applies its own formatter and static analysis; the root
