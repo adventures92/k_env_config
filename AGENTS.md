@@ -170,6 +170,32 @@ licensing decision, not a version bump. v5 is already on Node 24.
 mdBook is installed as a pinned binary rather than via `peaceiris/actions-mdbook`, whose released
 `@v2` still declares `using: node20` with no newer tag to move to.
 
+
+### Repository settings a release depends on
+
+Two settings live outside the repository's files, and neither can be caught by a dry run — both
+were found the hard way during the 0.2.0 release.
+
+- **Actions must be allowed to open pull requests.** Settings → Actions → General → Workflow
+  permissions needs *Read and write* **and** *Allow GitHub Actions to create and approve pull
+  requests*. Without it `prepare-release.yml` pushes the release branch and then fails on
+  `gh pr create` with "GitHub Actions is not permitted to create or approve pull requests",
+  leaving a branch and no pull request. The same toggle also lets workflows *approve* pull
+  requests, which weakens branch protection, so `setup-github-repo.sh` prints it rather than
+  setting it.
+- **The `github-pages` environment must allow deployments from tags.** Its default permits only
+  the default branch, and a release runs on `refs/tags/vX.Y.Z` — so `docs.yml` builds the guide,
+  then the deploy job is rejected by the environment with no steps and no log explaining why.
+  `setup-github-repo.sh` adds the `v*` tag policy; re-run it after enabling Pages, since the
+  environment does not exist until then.
+
+> **A rehearsal only exercises the paths a rehearsal uses.** `workflow_dispatch` runs on a branch
+> and declares its own inputs; a release runs on a tag through `workflow_call`. Three separate
+> failures in the 0.2.0 release lived in that gap — the two settings above, and `inputs.dry_run`
+> being undeclared on `release.yml`'s `workflow_call` trigger, which failed the whole run with
+> `startup_failure` before any job started. Treat a green dry run as evidence about the gate, not
+> about the release.
+
 ### Release secrets
 
 | Secret | Gradle property |

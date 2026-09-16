@@ -12,9 +12,12 @@
 #   2. Merge policy        — squash only, auto-delete merged branches
 #   3. Issue labels        — .github/labels.json
 #   4. Rulesets            — every file in .github/rulesets/*.json
+#   5. Pages environment   — allows release tags (v*) to deploy documentation
 #
 # The ruleset JSON files are the single source of truth and can equally be imported by hand:
 # Settings -> Rules -> Rulesets -> New ruleset -> Import a ruleset.
+#
+# It prints, but does not set, the things that need a secret value or a deliberate decision.
 
 set -euo pipefail
 
@@ -184,6 +187,36 @@ else
     done
 fi
 
+# --------------------------------------------- 5. pages deployment from tags
+
+# The github-pages environment restricts which refs may deploy to it. Its default allows only the
+# default branch, and a release runs on a TAG — so docs.yml builds fine and then the deploy job is
+# rejected by the environment, with no steps and no log to explain it.
+#
+# That is exactly what happened on v0.2.0: docs/build succeeded, docs/deploy failed, and the whole
+# release run reported failure despite having published to Maven Central. A rehearsal cannot catch
+# it, because workflow_dispatch runs on a branch and only a real release runs on a tag.
+#
+# Additive and idempotent: the branch policy is left alone, and re-adding an existing tag policy is
+# a no-op.
+
+info "GitHub Pages deployments from release tags"
+if (( DRY_RUN )); then
+    printf '  \033[90mwould ensure:\033[0m tag policy "v*" on the github-pages environment\n'
+elif ! gh api "repos/$REPO/environments/github-pages" >/dev/null 2>&1; then
+    warn "github-pages environment does not exist yet — enable Pages (Settings > Pages > Source:
+     GitHub Actions), then re-run. Until then a release cannot publish documentation."
+elif gh api "repos/$REPO/environments/github-pages/deployment-branch-policies" \
+        --jq '.branch_policies[] | select(.type=="tag" and .name=="v*") | .name' 2>/dev/null | grep -q 'v\*'; then
+    ok "Tag policy 'v*' already allowed to deploy to github-pages"
+elif gh api --method POST "repos/$REPO/environments/github-pages/deployment-branch-policies" \
+        -f name='v*' -f type='tag' >/dev/null 2>&1; then
+    ok "Allowed release tags (v*) to deploy to github-pages"
+else
+    warn "Could not add the tag policy. If the environment uses 'protected branches only', switch it
+     to custom policies first, or docs will not publish on a release."
+fi
+
 # ------------------------------------------------------------- summary
 
 echo
@@ -209,5 +242,19 @@ Still manual — these need secret values or a UI toggle, and this script never 
 
   2. GitHub Pages — Settings > Pages > Source: GitHub Actions   (required by docs.yml)
 
-  3. Enable Discussions — the issue-template chooser links to it.
+     Re-run this script afterwards: the github-pages environment only exists once Pages is
+     enabled, and step 5 above needs it to allow deployments from release tags.
+
+  3. Allow Actions to open pull requests — Settings > Actions > General > Workflow permissions:
+     "Read and write permissions" AND "Allow GitHub Actions to create and approve pull requests"
+
+     prepare-release.yml pushes the release branch and then opens the pull request. Without this
+     the push succeeds and the `gh pr create` fails with "GitHub Actions is not permitted to create
+     or approve pull requests", leaving a branch and no pull request.
+
+     Deliberately not set by this script. The same toggle also lets workflows APPROVE pull
+     requests, which weakens branch protection, so it should be a decision rather than a side
+     effect of running setup.
+
+  4. Enable Discussions — the issue-template chooser links to it.
 NOTE
