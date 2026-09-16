@@ -29,11 +29,24 @@ Then check the things CI cannot:
 
 ## 2. Release
 
-The automated path: open a PR that bumps `VERSION_NAME` and promotes the `## [Unreleased]`
-changelog heading to the new version. When it merges, `tag-and-release.yml` sees `VERSION_NAME`
-change, creates `vX.Y.Z`, and calls `release.yml`.
+The automated path is two workflows. Dispatch `prepare-release.yml`, which runs
+`scripts/prepare-release.sh` to bump `VERSION_NAME`, promote the `## [Unreleased]` changelog
+heading, rewrite the link refs and the install snippets, and open a `Release X.Y.Z` pull request.
+When that merges, `tag-and-release.yml` sees `VERSION_NAME` change, creates `vX.Y.Z`, and calls
+`release.yml`.
 
-To rehearse without publishing:
+```bash
+gh workflow run prepare-release.yml -f bump=patch
+```
+
+See the diff first, without touching the worktree — the script makes no git-writing or network
+calls, so this is the same rewrite the workflow would commit:
+
+```bash
+./scripts/prepare-release.sh patch --dry-run
+```
+
+To rehearse the publish itself without publishing:
 
 ```bash
 gh workflow run release.yml -f version=X.Y.Z -f dry_run=true

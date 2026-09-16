@@ -140,6 +140,11 @@ Unreleased work accumulates under `## [Unreleased]` in `CHANGELOG.md`. Cutting a
 renaming that heading and bumping `VERSION_NAME`; the release workflow **refuses to publish a
 version with no matching CHANGELOG section**, by design.
 
+`scripts/prepare-release.sh` performs that edit — the bump in `kenv-plugin/gradle.properties`, the
+changelog promotion and link refs, and the install snippets in `README.md` and `docs/`. It makes no
+git-writing or network calls, so `./scripts/prepare-release.sh patch --dry-run` shows the exact diff
+without touching the worktree. `prepare-release.yml` runs it and opens the release pull request.
+
 Branch policy lives in `.github/rulesets/*.json` and is applied by `scripts/setup-github-repo.sh`,
 which refuses to apply a ruleset whose required checks name jobs that do not exist.
 
@@ -148,6 +153,7 @@ which refuses to apply a ruleset whose required checks name jobs that do not exi
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
 | `ci.yml` | PR and push to `main` | `plugin` and `demo` jobs on hosted runners |
+| `prepare-release.yml` | manual | Step 1 of a release. Runs `scripts/prepare-release.sh` and opens the release pull request |
 | `release.yml` | tag `v*`; `workflow_call`; manual with `dry_run` | The only path to a published release |
 | `tag-and-release.yml` | push to `main` touching `kenv-plugin/gradle.properties` | Detects a `VERSION_NAME` change, tags, calls `release.yml` |
 | `docs.yml` | docs push to `main`; `workflow_call`; manual | mdBook guide to GitHub Pages |
