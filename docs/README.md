@@ -11,7 +11,7 @@ KEnv Config is a Gradle plugin that generates Kotlin objects from YAML schema fi
 ```toml
 # gradle/libs.versions.toml
 [versions]
-kenvConfig = "<latest>"
+kenvConfig = "0.2.0"
 
 [plugins]
 kenvConfig = { id = "io.github.adventures92.kenv-config", version.ref = "kenvConfig" }
@@ -29,7 +29,7 @@ plugins {
 ```kotlin
 // build.gradle.kts
 plugins {
-    id("io.github.adventures92.kenv-config") version "<latest>"
+    id("io.github.adventures92.kenv-config") version "0.2.0"
 }
 ```
 
