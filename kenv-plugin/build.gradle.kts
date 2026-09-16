@@ -1,9 +1,13 @@
+import com.vanniktech.maven.publish.GradlePlugin
+import com.vanniktech.maven.publish.JavadocJar
+
 plugins {
     alias(libs.plugins.kotlinJvm)
     `java-gradle-plugin`
     alias(libs.plugins.mavenPublish)
     alias(libs.plugins.spotless)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.dokka)
 }
 
 group = "io.github.adventures92"
@@ -45,6 +49,15 @@ gradlePlugin {
 }
 
 mavenPublishing {
+    // Without this the published javadoc jar is an EMPTY stub: 0.2.0 shipped one containing
+    // nothing but a manifest, because Central requires the file to exist and never inspects it.
+    //
+    // The task name matters. `dokkaHtml` is the Dokka V1 helper — in V2 it still exists, runs,
+    // produces nothing and reports success, so wiring it here yields the same empty jar with no
+    // error anywhere. `dokkaGeneratePublicationHtml` is the V2 task that actually emits HTML.
+    // Sockit shipped empty javadoc jars from exactly that mistake.
+    configure(GradlePlugin(javadocJar = JavadocJar.Dokka("dokkaGeneratePublicationHtml")))
+
     // Central Portal is the only host from 0.33 onwards — the SonatypeHost argument this used to
     // take was removed when the legacy OSSRH endpoints were retired. The release workflow runs
     // `publishAndReleaseToMavenCentral`, which promotes the deployment once Central's validation

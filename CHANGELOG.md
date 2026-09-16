@@ -11,6 +11,13 @@ coordinates. Build, CI and refactoring changes do not; git history holds those.
 
 ## [Unreleased]
 
+### Fixed
+
+- The published javadoc jar is no longer empty. `0.2.0` shipped one containing only a manifest:
+  Maven Central requires the file to exist and never inspects it, so an empty stub passes
+  validation silently. Dokka now generates it, so the API reference on javadoc.io resolves.
+  The sources jar was always complete, so this affected the rendered reference only.
+
 ## [0.2.0] - 2026-09-16
 
 ### Fixed
