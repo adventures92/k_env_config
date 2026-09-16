@@ -40,7 +40,7 @@ jobs:
       # Held at v5 deliberately. v6 moves caching into `gradle-actions-caching`, a proprietary
       # component whose use requires accepting https://gradle.com/legal/terms-of-use/ — a licensing
       # decision, not a version bump. v5 already runs on Node 24, so it carries no deprecation debt.
-      - uses: gradle/actions/setup-gradle@v5
+      - uses: gradle/actions/setup-gradle@v6
 
       # Formatting and static analysis, before the tests — a failure here is cheap to read and
       # cheap to fix, and there is no point spending a test run to find out the build is unformatted.
@@ -88,7 +88,7 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - uses: gradle/actions/setup-gradle@v5
+      - uses: gradle/actions/setup-gradle@v6
 
       # The root build's formatter, covering the demo app and the root build scripts.
       # `kenv-plugin/**` is excluded there and checked by the `plugin` job instead. This runs here
