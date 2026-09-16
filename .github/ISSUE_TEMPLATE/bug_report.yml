@@ -1,0 +1,83 @@
+name: Bug report
+description: Something behaves differently from what the documentation says.
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Most bugs here come down to what went in (the schema and env files) versus what came out
+        (the generated `EnvConfig.kt`). Please include both — they matter more than anything else.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you expected, and what happened instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: schema
+    attributes:
+      label: Schema
+      description: The smallest schema file that shows the problem.
+      render: yaml
+    validations:
+      required: true
+
+  - type: textarea
+    id: env
+    attributes:
+      label: Env file
+      description: >
+        The matching env file. **Redact every real value** — replace secrets with placeholders.
+        If the bug is about how a value is parsed, keep the value's *shape* (quoting, casing)
+        since that is usually the cause.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: generated
+    attributes:
+      label: Generated output
+      description: The relevant part of the generated `EnvConfig.kt`, or the error instead of it.
+      render: kotlin
+
+  - type: input
+    id: version
+    attributes:
+      label: KEnv Config version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: gradle
+    attributes:
+      label: Gradle version
+      placeholder: "9.6.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: format
+    attributes:
+      label: Env file format
+      options:
+        - .env
+        - YAML
+        - TOML
+        - more than one
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I checked this against the latest released version
+          required: true
+        - label: I have replaced every real secret in the above with a placeholder
+          required: true

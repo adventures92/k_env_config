@@ -1,0 +1,77 @@
+[
+  {
+    "name": "bug",
+    "color": "d73a4a",
+    "description": "Behaviour differs from what the documentation states"
+  },
+  {
+    "name": "enhancement",
+    "color": "0075ca",
+    "description": "New capability or an improvement to an existing one"
+  },
+  {
+    "name": "documentation",
+    "color": "0075ca",
+    "description": "README or the mdBook guide under docs/"
+  },
+  {
+    "name": "build",
+    "color": "5319e7",
+    "description": "Gradle, CI, publishing, or release tooling"
+  },
+  {
+    "name": "area: schema",
+    "color": "1d76db",
+    "description": "Schema parsing, validation, scopes and defaults"
+  },
+  {
+    "name": "area: env-parsing",
+    "color": "1d76db",
+    "description": "The .env, YAML and TOML parsers and their round-tripping"
+  },
+  {
+    "name": "area: codegen",
+    "color": "1d76db",
+    "description": "Generated Kotlin — shape, naming, or what ends up in EnvConfig"
+  },
+  {
+    "name": "area: plugin",
+    "color": "1d76db",
+    "description": "Task wiring, the kenvConfig DSL, variant mapping, configuration cache"
+  },
+  {
+    "name": "needs-triage",
+    "color": "fbca04",
+    "description": "Not yet reviewed by a maintainer"
+  },
+  {
+    "name": "needs-reproduction",
+    "color": "fbca04",
+    "description": "Waiting on a minimal reproduction from the reporter"
+  },
+  {
+    "name": "blocked",
+    "color": "b60205",
+    "description": "Waiting on something outside this repository"
+  },
+  {
+    "name": "wontfix",
+    "color": "ffffff",
+    "description": "Deliberately out of scope"
+  },
+  {
+    "name": "good first issue",
+    "color": "7057ff",
+    "description": "Self-contained, with the approach already described"
+  },
+  {
+    "name": "help wanted",
+    "color": "008672",
+    "description": "Maintainer would welcome a pull request"
+  },
+  {
+    "name": "breaking",
+    "color": "b60205",
+    "description": "Requires a major/minor bump and a migration note"
+  }
+]
