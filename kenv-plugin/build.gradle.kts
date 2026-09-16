@@ -1,7 +1,7 @@
 plugins {
-    kotlin("jvm") version "2.3.20"
+    alias(libs.plugins.kotlinJvm)
     `java-gradle-plugin`
-    id("com.vanniktech.maven.publish") version "0.30.0"
+    alias(libs.plugins.mavenPublish)
 }
 
 group = "io.github.adventures92"
@@ -19,15 +19,15 @@ dependencies {
     implementation(kotlin("stdlib"))
 
     // YAML parsing
-    implementation("org.yaml:snakeyaml:2.2")
+    implementation(libs.snakeyaml)
 
     // TOML parsing
-    implementation("com.moandjiezana.toml:toml4j:0.7.2")
+    implementation(libs.toml4j)
 
     // Test dependencies
-    testImplementation("io.kotest:kotest-runner-junit5:5.9.1")
-    testImplementation("io.kotest:kotest-property:5.9.1")
-    testImplementation("io.kotest:kotest-assertions-core:5.9.1")
+    testImplementation(libs.kotest.runner.junit5)
+    testImplementation(libs.kotest.property)
+    testImplementation(libs.kotest.assertionsCore)
     testImplementation(gradleTestKit())
 }
 
@@ -43,9 +43,16 @@ gradlePlugin {
 }
 
 mavenPublishing {
-    publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL)
+    // Central Portal is the only host from 0.33 onwards — the SonatypeHost argument this used to
+    // take was removed when the legacy OSSRH endpoints were retired. The release workflow runs
+    // `publishAndReleaseToMavenCentral`, which promotes the deployment once Central's validation
+    // passes; a plain `publishToMavenCentral` leaves it waiting for a manual Publish in the portal.
+    publishToMavenCentral()
 
-    signAllPublications()
+    // Sign only when a key is configured, so a local `publishToMavenLocal` works without one.
+    if (providers.gradleProperty("signingInMemoryKey").isPresent) {
+        signAllPublications()
+    }
 
     coordinates(group.toString(), "kenv-config", version.toString())
 
@@ -53,7 +60,7 @@ mavenPublishing {
         name.set("KEnv Config")
         description.set("Schema-based, type-safe environment variable management for Kotlin Multiplatform projects")
         inceptionYear.set("2025")
-        url.set("https://github.com/adventures92/kenv-config")
+        url.set("https://github.com/adventures92/k_env_config")
 
         licenses {
             license {
@@ -72,9 +79,9 @@ mavenPublishing {
         }
 
         scm {
-            url.set("https://github.com/adventures92/kenv-config")
-            connection.set("scm:git:git://github.com/adventures92/kenv-config.git")
-            developerConnection.set("scm:git:ssh://git@github.com/adventures92/kenv-config.git")
+            url.set("https://github.com/adventures92/k_env_config")
+            connection.set("scm:git:git://github.com/adventures92/k_env_config.git")
+            developerConnection.set("scm:git:ssh://git@github.com/adventures92/k_env_config.git")
         }
     }
 }
